@@ -1,13 +1,16 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
-
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import java.util.concurrent.Callable;
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig.DBConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
+import java.util.concurrent.Callable;
+
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
 
 @RequiredArgsConstructor
 @Command(
@@ -16,29 +19,58 @@ import picocli.CommandLine.Command;
     description = "Sets a profiles configuration")
 public class ConfigSetCommand implements Callable<Integer> {
 
-  @CommandLine.Option(
+  @Option(
       names = {"-p", "--profile"},
       description = "Profile to set",
       required = true)
   private String profileName;
 
-  @CommandLine.Option(
+  @Option(
       names = {"-a", "--access-token"},
+      interactive = true,
       description = "Set the access token for the intermediate song",
       required = false)
   private String accessToken;
 
-  @CommandLine.Option(
-      names = {"-t", "--target-url"},
-      description = "Set target url for the intermediate song",
-      required = false)
-  private String targetUrl;
-
-  @CommandLine.Option(
+  @Option(
       names = {"-s", "--source-url"},
       description = "Set source url that will be imported into the intermediate song",
       required = false)
   private String sourceUrl;
+
+  @Option(
+      names = {"-t", "--target-url"},
+      description = "Set target url of the intermediate song server",
+      required = false)
+  private String targetUrl;
+
+  @Option(
+      names = {"-dn", "--db-name"},
+      description = "Set the target database name",
+      defaultValue = "song",
+      required = false)
+  private String dbname;
+
+  @Option(
+      names = {"-dh", "--db-hostname"},
+      description = "Set the target database hostname",
+      defaultValue = "localhost",
+      required = false)
+  private String dbHostname;
+
+  @Option(
+      names = {"-dp", "--db-port"},
+      description = "Set the target database port",
+      defaultValue = "5432",
+      required = false)
+  private String dbPort;
+
+  @Option(
+      names = {"-dw", "--db-password"},
+      interactive = true,
+      description = "Set the target database password",
+      required = false)
+  private String dbPassword;
 
   @Override
   public Integer call() throws Exception {
@@ -47,7 +79,17 @@ public class ConfigSetCommand implements Callable<Integer> {
             .accessToken(accessToken)
             .name(profileName)
             .sourceUrl(sourceUrl)
-            .targetUrl(targetUrl)
+            .targetSong(
+                SongConfig.builder()
+                    .serverUrl(targetUrl)
+                    .db(
+                        DBConfig.builder()
+                            .dbname(dbname)
+                            .hostname(dbHostname)
+                            .password(dbPassword)
+                            .port(dbPort)
+                            .build())
+                    .build())
             .build();
     saveProfile(profileConfig);
     return 0;
