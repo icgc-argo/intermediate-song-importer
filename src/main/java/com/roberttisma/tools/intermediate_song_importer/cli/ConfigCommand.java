@@ -1,17 +1,18 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+
+import java.util.concurrent.Callable;
 
 @Slf4j
 @RequiredArgsConstructor
 @Command(
     name = "config",
     mixinStandardHelpOptions = true,
-    subcommands = {ConfigSetCommand.class, ConfigGetCommand.class},
+    subcommands = {ConfigSetCommand.class, ConfigGetCommand.class, ConfigDeleteCommand.class},
     description = "Configures the tool")
 public class ConfigCommand implements Callable<Integer> {
   /*

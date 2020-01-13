@@ -40,6 +40,19 @@ public class ProfileManager {
     return config.getProfiles().stream().filter(x -> x.getName().equals(profileName)).findFirst();
   }
 
+  public static void deleteProfile(@NonNull String profileName) throws IOException {
+    var config = readConfig();
+    checkProfileExist(config, profileName);
+    config.getProfiles().removeIf(x -> x.getName().equals(profileName));
+    OBJECT_MAPPER.writeValue(getConfigFilePath().toFile(), config);
+  }
+
+  private static void checkProfileExist(Config c, String profileName) {
+    val result =
+        c.getProfiles().stream().map(ProfileConfig::getName).anyMatch(x -> x.equals(profileName));
+    checkImporter(result, "The profile '%s' does not exist", profileName);
+  }
+
   public static void saveProfile(@NonNull ProfileConfig profileConfigToSave) throws IOException {
     var config = readConfig();
     val existingProfileResult = findProfile(config, profileConfigToSave.getName());
@@ -47,7 +60,8 @@ public class ProfileManager {
       val base = existingProfileResult.get();
       base.merge(profileConfigToSave);
     } else {
-      config = Config.builder().profile(profileConfigToSave).build();
+      config.getProfiles().add(profileConfigToSave);
+      //      config = Config.builder().profile(profileConfigToSave).build();
     }
     OBJECT_MAPPER.writeValue(getConfigFilePath().toFile(), config);
     log.info(

@@ -1,5 +1,7 @@
 package com.roberttisma.tools.intermediate_song_importer.model;
 
+import static com.google.common.collect.Lists.newArrayList;
+
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +15,5 @@ import lombok.Singular;
 @AllArgsConstructor
 public class Config {
 
-  @Singular private List<ProfileConfig> profiles;
+  @Singular private List<ProfileConfig> profiles = newArrayList();
 }

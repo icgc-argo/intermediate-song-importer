@@ -42,13 +42,15 @@ public class ProfileConfig implements Mergable<ProfileConfig> {
     public static class DBConfig implements Mergable<DBConfig> {
       private String dbname;
       private String hostname;
-      private String port = "5432";
+      private String port;
+      private String username;
       private String password;
 
       @Override
       public void merge(@NonNull DBConfig dbConfig) {
         mergeField(DBConfig::getDbname, DBConfig::setDbname, this, dbConfig);
         mergeField(DBConfig::getHostname, DBConfig::setHostname, this, dbConfig);
+        mergeField(DBConfig::getUsername, DBConfig::setUsername, this, dbConfig);
         mergeField(DBConfig::getPassword, DBConfig::setPassword, this, dbConfig);
         mergeField(DBConfig::getPort, DBConfig::setPort, this, dbConfig);
       }

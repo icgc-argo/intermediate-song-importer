@@ -1,16 +1,15 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
+
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig.DBConfig;
+import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.util.concurrent.Callable;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
 
 @RequiredArgsConstructor
 @Command(
@@ -27,7 +26,7 @@ public class ConfigSetCommand implements Callable<Integer> {
 
   @Option(
       names = {"-a", "--access-token"},
-      interactive = true,
+      interactive = false,
       description = "Set the access token for the intermediate song",
       required = false)
   private String accessToken;
@@ -66,8 +65,15 @@ public class ConfigSetCommand implements Callable<Integer> {
   private String dbPort;
 
   @Option(
+      names = {"-du", "--db-username"},
+      interactive = false,
+      description = "Set the target database username",
+      required = false)
+  private String dbUsername;
+
+  @Option(
       names = {"-dw", "--db-password"},
-      interactive = true,
+      interactive = false,
       description = "Set the target database password",
       required = false)
   private String dbPassword;
@@ -87,6 +93,7 @@ public class ConfigSetCommand implements Callable<Integer> {
                             .dbname(dbname)
                             .hostname(dbHostname)
                             .password(dbPassword)
+                            .username(dbUsername)
                             .port(dbPort)
                             .build())
                     .build())
