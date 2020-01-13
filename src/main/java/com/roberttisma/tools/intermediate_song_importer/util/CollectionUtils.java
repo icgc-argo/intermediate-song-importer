@@ -1,11 +1,10 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
-import lombok.NonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.function.Function;
-
-import static java.util.stream.Collectors.toList;
+import lombok.NonNull;
 
 public class CollectionUtils {
 

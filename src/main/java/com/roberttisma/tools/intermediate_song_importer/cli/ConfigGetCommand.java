@@ -1,15 +1,5 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import picocli.CommandLine.ArgGroup;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-
-import java.util.concurrent.Callable;
-
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToList;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.toPrettyJson;
@@ -17,9 +7,21 @@ import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManag
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.readConfig;
 import static java.lang.String.format;
 
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import java.util.concurrent.Callable;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
 @Slf4j
 @RequiredArgsConstructor
-@Command(name = "get", mixinStandardHelpOptions = true, description = "Gets a profiles configuration")
+@Command(
+    name = "get",
+    mixinStandardHelpOptions = true,
+    description = "Gets a profiles configuration")
 public class ConfigGetCommand implements Callable<Integer> {
 
   @ArgGroup(exclusive = true, multiplicity = "1")
@@ -56,7 +58,7 @@ public class ConfigGetCommand implements Callable<Integer> {
         return 1;
       }
     } else {
-      val errorMessage = format("[ERROR]: should not be here");
+      val errorMessage = "[ERROR]: should not be here";
       System.out.println(errorMessage);
       log.error(errorMessage);
       return 1;

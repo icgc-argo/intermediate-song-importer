@@ -48,4 +48,4 @@ program_home=$current_dir/`dirname $fn`/../
 
 java --illegal-access=deny \
          -jar $program_home/lib/intermediate-song-importer.jar \
-         "$@"
+         main "$@"

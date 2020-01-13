@@ -1,17 +1,19 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
+
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-import java.util.concurrent.Callable;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
-
 @RequiredArgsConstructor
-@Command(name = "set", mixinStandardHelpOptions = true, description = "Sets a profiles configuration")
+@Command(
+    name = "set",
+    mixinStandardHelpOptions = true,
+    description = "Sets a profiles configuration")
 public class ConfigSetCommand implements Callable<Integer> {
 
   @CommandLine.Option(
