@@ -10,7 +10,5 @@ public class Main {
 
   public static void main(String[] args) throws IOException {
     new CommandLine(new IntermediateSongImporterCommand()).execute(args);
-    //    new CommandLine(new IntermediateSongImporterCommand())
-    //        .execute("config set --profile hi -s sdfsdf -t sdfsdf".split("\\s+"));
   }
 }

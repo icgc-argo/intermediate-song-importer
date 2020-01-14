@@ -1,45 +1,50 @@
 package com.roberttisma.tools.intermediate_song_importer;
 
-import static java.lang.String.format;
-
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import java.util.Map;
-import lombok.Builder;
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig.DBConfig;
 import lombok.NonNull;
-import lombok.Value;
+import lombok.RequiredArgsConstructor;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 
-@Value
-@Builder
-public class DBUpdater {
+import java.io.Closeable;
+import java.util.Map;
 
-  @NonNull private final ProfileConfig.SongConfig.DBConfig dbConfig;
-  @NonNull private final Map<String, String> objectIdMap;
+import static java.lang.String.format;
 
-  public void updateObjectIds() {
-    createJdbi(dbConfig).useHandle(this::updateAll);
+@RequiredArgsConstructor
+public class DBUpdater implements Closeable {
+
+  @NonNull private Handle handle;
+
+  public void updateWithMap(@NonNull Map<String, String> objectIdMap) {
+    objectIdMap.forEach(this::update);
   }
 
-  private void updateAll(Handle handle) {
-    objectIdMap.forEach((s, t) -> update(handle, s, t));
+  public int update(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
+    return handle.createUpdate(
+        "UPDATE file SET id=:targetObjectId WHERE id=:sourceObjectId")
+        .bind("sourceObjectId", sourceObjectId)
+        .bind("targetObjectId", targetObjectId)
+        .execute();
   }
 
-  private static String createUrl(ProfileConfig.SongConfig.DBConfig dbConfig) {
+  @Override
+  public void close() {
+    handle.close();
+  }
+
+  public static DBUpdater createDBUpdater(@NonNull DBConfig dbConfig){
+    return new DBUpdater(createJdbi(dbConfig).open());
+  }
+
+  private static String createUrl(DBConfig dbConfig) {
     return format(
         "jdbc:postgresql://%s:%s/%s?stringtype=unspecified",
         dbConfig.getHostname(), dbConfig.getPort(), dbConfig.getDbname());
   }
 
-  private static Jdbi createJdbi(ProfileConfig.SongConfig.DBConfig dbConfig) {
+  private static Jdbi createJdbi(DBConfig dbConfig) {
     return Jdbi.create(createUrl(dbConfig), dbConfig.getUsername(), dbConfig.getPassword());
   }
 
-  private static int update(Handle h, String sourceObjectId, String targetObjectId) {
-    return h.createUpdate(
-            "UPDATE file SET objectid=:targetObjectId WHERE file.objectId=:sourceObjectId")
-        .bind("sourceObjectId", sourceObjectId)
-        .bind("targetObjectId", targetObjectId)
-        .execute();
-  }
 }
