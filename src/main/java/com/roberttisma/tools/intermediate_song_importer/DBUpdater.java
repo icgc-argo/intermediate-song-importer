@@ -1,15 +1,14 @@
 package com.roberttisma.tools.intermediate_song_importer;
 
+import static java.lang.String.format;
+
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig.DBConfig;
+import java.io.Closeable;
+import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
-
-import java.io.Closeable;
-import java.util.Map;
-
-import static java.lang.String.format;
 
 @RequiredArgsConstructor
 public class DBUpdater implements Closeable {
@@ -21,8 +20,8 @@ public class DBUpdater implements Closeable {
   }
 
   public int update(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
-    return handle.createUpdate(
-        "UPDATE file SET id=:targetObjectId WHERE id=:sourceObjectId")
+    return handle
+        .createUpdate("UPDATE file SET id=:targetObjectId WHERE id=:sourceObjectId")
         .bind("sourceObjectId", sourceObjectId)
         .bind("targetObjectId", targetObjectId)
         .execute();
@@ -33,7 +32,7 @@ public class DBUpdater implements Closeable {
     handle.close();
   }
 
-  public static DBUpdater createDBUpdater(@NonNull DBConfig dbConfig){
+  public static DBUpdater createDBUpdater(@NonNull DBConfig dbConfig) {
     return new DBUpdater(createJdbi(dbConfig).open());
   }
 
@@ -46,5 +45,4 @@ public class DBUpdater implements Closeable {
   private static Jdbi createJdbi(DBConfig dbConfig) {
     return Jdbi.create(createUrl(dbConfig), dbConfig.getUsername(), dbConfig.getPassword());
   }
-
 }

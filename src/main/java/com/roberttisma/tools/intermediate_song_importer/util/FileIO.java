@@ -1,7 +1,12 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
-import lombok.NonNull;
-import lombok.val;
+import static com.google.common.io.Files.toByteArray;
+import static java.lang.String.format;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.isRegularFile;
+import static java.nio.file.Files.walk;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,14 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import static com.google.common.io.Files.toByteArray;
-import static java.lang.String.format;
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.isRegularFile;
-import static java.nio.file.Files.walk;
-import static java.util.stream.Collectors.toList;
+import lombok.NonNull;
+import lombok.val;
 
 public class FileIO {
 
@@ -65,8 +64,7 @@ public class FileIO {
   public static Stream<Path> streamFilesInDir(@NonNull Path dirPath, boolean recursive)
       throws IOException {
     checkDirectoryExists(dirPath);
-    return (recursive ? walk(dirPath) : walk(dirPath, 1))
-        .filter(x -> !isDirectory(x));
+    return (recursive ? walk(dirPath) : walk(dirPath, 1)).filter(x -> !isDirectory(x));
   }
 
   public static List<Path> listFilesInDir(@NonNull Path dirPath, boolean recursive)

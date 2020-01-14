@@ -42,9 +42,8 @@ public class RunCommand implements Callable<Integer> {
     val result = findProfile(profileName);
     if (result.isPresent()) {
       val profileConfig = result.get();
-      try (val service = createMigrationService(profileConfig)){
-        streamFilesInDir(inputDir, true)
-            .forEach(service::migrate);
+      try (val service = createMigrationService(profileConfig)) {
+        streamFilesInDir(inputDir, true).forEach(service::migrate);
       }
     } else {
       val errorMessage = format("The profile '%s does not exist'", result);
