@@ -1,14 +1,13 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.deleteProfile;
+
 import com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException;
+import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.util.concurrent.Callable;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.deleteProfile;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class ConfigDeleteCommand implements Callable<Integer> {
   public Integer call() throws Exception {
     try {
       deleteProfile(profileName);
-      System.out.println("Deleted profile "+profileName);
+      System.out.println("Deleted profile " + profileName);
     } catch (ImporterException e) {
       log.error(e.getMessage());
       System.err.println(e.getMessage());

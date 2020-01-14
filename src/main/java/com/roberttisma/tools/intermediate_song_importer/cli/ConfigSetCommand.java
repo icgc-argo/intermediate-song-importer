@@ -98,7 +98,8 @@ public class ConfigSetCommand implements Callable<Integer> {
                             .build())
                     .build())
             .build();
-    saveProfile(profileConfig);
+    val status = saveProfile(profileConfig);
+    System.out.println(status);
     return 0;
   }
 }

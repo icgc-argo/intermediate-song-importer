@@ -1,6 +1,7 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static java.lang.String.format;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
@@ -44,7 +45,7 @@ public class ProfileManager {
     var config = readConfig();
     checkProfileExist(config, profileName);
     config.getProfiles().removeIf(x -> x.getName().equals(profileName));
-    OBJECT_MAPPER.writeValue(getConfigFilePath().toFile(), config);
+    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(getConfigFilePath().toFile(), config);
   }
 
   private static void checkProfileExist(Config c, String profileName) {
@@ -53,7 +54,7 @@ public class ProfileManager {
     checkImporter(result, "The profile '%s' does not exist", profileName);
   }
 
-  public static void saveProfile(@NonNull ProfileConfig profileConfigToSave) throws IOException {
+  public static String saveProfile(@NonNull ProfileConfig profileConfigToSave) throws IOException {
     var config = readConfig();
     val existingProfileResult = findProfile(config, profileConfigToSave.getName());
     if (existingProfileResult.isPresent()) {
@@ -63,11 +64,10 @@ public class ProfileManager {
       config.getProfiles().add(profileConfigToSave);
       //      config = Config.builder().profile(profileConfigToSave).build();
     }
-    OBJECT_MAPPER.writeValue(getConfigFilePath().toFile(), config);
-    log.info(
-        "{} profile: {}",
-        existingProfileResult.isPresent() ? "Updated" : "Created",
-        profileConfigToSave.getName());
+    OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(getConfigFilePath().toFile(), config);
+    return format(
+        "%s profile: %s",
+        existingProfileResult.isPresent() ? "Updated" : "Created", profileConfigToSave.getName());
   }
 
   public static Path getConfigFilePath() throws IOException {

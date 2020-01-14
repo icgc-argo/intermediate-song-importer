@@ -1,20 +1,21 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToList;
-import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.toPrettyJson;
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.readConfig;
-import static java.lang.String.format;
-
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.util.concurrent.Callable;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToList;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.toPrettyJson;
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.readConfig;
+import static java.lang.String.format;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class ConfigGetCommand implements Callable<Integer> {
         val errorMessage =
             format("[ERROR]: the profile '%s' does not exist", exclusive.profileName);
         System.out.println(errorMessage);
-        log.error(errorMessage);
+        log.debug(errorMessage);
         return 1;
       }
     } else {

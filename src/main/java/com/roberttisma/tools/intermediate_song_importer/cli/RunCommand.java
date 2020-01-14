@@ -49,8 +49,5 @@ public class RunCommand implements Callable<Integer> {
     return 0;
   }
 
-  private void run(ProfileConfig config) {
-    // get analys
-
-  }
+  private void run(ProfileConfig config) {}
 }
