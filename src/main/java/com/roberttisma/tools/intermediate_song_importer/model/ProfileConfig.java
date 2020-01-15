@@ -1,13 +1,13 @@
 package com.roberttisma.tools.intermediate_song_importer.model;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeField;
+import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeMergableField;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeField;
-import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeMergableField;
 
 @Data
 @Builder
@@ -26,5 +26,4 @@ public class ProfileConfig implements Mergable<ProfileConfig> {
     mergeMergableField(ProfileConfig::getTargetSong, this, mergeIn);
     mergeMergableField(ProfileConfig::getSourceSong, this, mergeIn);
   }
-
 }

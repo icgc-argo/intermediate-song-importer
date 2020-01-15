@@ -208,6 +208,11 @@ start-services: _setup package
 	@$(MAKE) _setup-object-storage
 	@echo $(YELLOW)$(INFO_HEADER) Succesfully started services! $(END)
 
+build-importer: 
+	@echo $(YELLOW)$(INFO_HEADER) "Forcefully building importer container" $(END)
+	@$(MVN_CMD) package -DskipTests
+	@$(DOCKER_COMPOSE_CMD) build intermediate-song-importer
+
 #############################################################
 #  Logging Targets
 #############################################################
