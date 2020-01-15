@@ -239,8 +239,16 @@ show-score-server-logs:
 test: start-services
 	@$(IMPORTER_CMD) run 
 
-client:
+fresh-client:
 	@$(MVN_CMD) clean package -DskipTests
+	@tar zxvf target/*.tar.gz -C target
+
+refresh-intermediate-song-db:
+	@$(DOCKER_COMPOSE_CMD) exec intermediate-song-db sh -c "psql -U postgres song < /refresh/refresh-song-db.sql"
+
+client:
+	@rm -rf  target/intermediate-song-importer*
+	@$(MVN_CMD) package -DskipTests
 	@tar zxvf target/*.tar.gz -C target
 
 

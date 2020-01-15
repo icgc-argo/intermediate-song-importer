@@ -4,26 +4,23 @@ import static java.lang.String.format;
 
 import com.roberttisma.tools.intermediate_song_importer.model.DBConfig;
 import java.io.Closeable;
-import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 
+@Slf4j
 @RequiredArgsConstructor
 public class DBUpdater implements Closeable {
 
   @NonNull private Handle handle;
 
-  public void updateWithMap(@NonNull Map<String, String> objectIdMap) {
-    objectIdMap.forEach(this::update);
-  }
-
   public int update(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
     return handle
-        .createUpdate("UPDATE file SET id=:targetObjectId WHERE id=:sourceObjectId")
-        .bind("sourceObjectId", sourceObjectId)
-        .bind("targetObjectId", targetObjectId)
+        .createUpdate("UPDATE file SET id=:sid WHERE id=:tid")
+        .bind("sid", sourceObjectId)
+        .bind("tid", targetObjectId)
         .execute();
   }
 

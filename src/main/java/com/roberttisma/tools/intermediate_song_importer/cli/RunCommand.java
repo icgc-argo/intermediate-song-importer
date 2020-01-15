@@ -6,7 +6,6 @@ import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.strea
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
 import static java.lang.String.format;
 
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +51,4 @@ public class RunCommand implements Callable<Integer> {
     }
     return 0;
   }
-
-  private void run(ProfileConfig config) {}
 }

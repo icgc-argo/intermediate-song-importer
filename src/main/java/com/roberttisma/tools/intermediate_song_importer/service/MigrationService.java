@@ -1,26 +1,24 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
+import static java.util.stream.Collectors.toMap;
+
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.file.Path;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.file.Path;
-
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
-import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
-import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toMap;
 
 @Value
 @Slf4j
@@ -56,12 +54,13 @@ public class MigrationService implements Closeable {
 
       // Publish
       targetApi.publish(studyId, targetAnalysisId, false);
+      log.info("[PROCESSING_SUCCESS] filename='{}'", jsonFile.toString());
     } catch (Throwable t) {
-      val message =
-          format(
-              "[PROCESSING_ERROR] filename='%s' errorType='%s':  '%s",
-              jsonFile.toString(), t.getClass().getSimpleName(), t.getMessage());
-      log.error(message);
+      log.error(
+          "[PROCESSING_ERROR] filename='{}' errorType='{}':  '{}",
+          jsonFile.toString(),
+          t.getClass().getSimpleName(),
+          t.getMessage());
     }
   }
 

@@ -29,7 +29,7 @@ elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
 #    echo Found Java in JAVA_HOME
     _java="$JAVA_HOME/bin/java"
 else
-    echo "Java not found. Sing requires JDK 1.8"
+    echo "Java not found. Sing requires Java 11."
     exit 1
 fi
 
@@ -37,15 +37,22 @@ if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
     regex="^1[1-9][\.]{0,1}"
     if [[ ! $version =~ $regex ]]; then 
-        echo Java 11 required for swear_detector. Current version is $version
+        echo Java 11 required for Sing. Current version is $version
         exit 1
     fi
 fi
 
-current_dir=$PWD
-fn=$0
-program_home=$current_dir/`dirname $fn`/../
+here=$(dirname $0)
+if [ "$here" == "." ]; then
+	# This is the case, when the user runs this script from the ./bin directory
+	app_home=../
+else
+	app_home=${here%/bin}
+fi
 
 java --illegal-access=deny \
-         -jar $program_home/lib/intermediate-song-importer.jar \
+		 -Dlog.name=song \
+		 -Dlog.path=$app_home/logs \
+		 -Dlogback.configurationFile=$app_home/conf/logback.xml \
+         -jar $app_home/lib/intermediate-song-importer.jar \
          "$@"
