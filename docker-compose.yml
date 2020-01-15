@@ -186,6 +186,8 @@ services:
     build:
       context: ./
       dockerfile: "$DOCKERFILE_NAME"
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
     volumes:
       - "./docker/intermediate-song-importer-config:/root/.intermediate-song-importer"
       - "./docker/intermediate-song-importer-data:/intermediate-song-importer/input"

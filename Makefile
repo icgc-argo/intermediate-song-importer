@@ -132,6 +132,19 @@ help:
 	@grep '^[A-Za-z][A-Za-z0-9_-]\+:.*' $(ROOT_DIR)/Makefile | sed 's/:.*//' | sed 's/^/\t/'
 	@echo
 
+intellij-importer-config: 
+	@echo
+	@echo
+	@echo $(YELLOW)$(INFO_HEADER) In IntelliJ, configure the docker run profile with the following parameters to allow interactive debug on port 5005 $(END)
+	@echo "$(YELLOW)Image ID:$(END)               $(PROJECT_NAME)_intermediate-song-importer:latest"
+	@echo "$(YELLOW)Command:$(END)                bin/intermediate-song-importer run -p test -d /intermediate-song-importer/input"
+	@echo "$(YELLOW)Bind Mounts:$(END)            $(DOCKER_DIR)/intermediate-song-importer-data:/intermediate-song-importer/input $(DOCKER_DIR)/intermediate-song-importer-config:/root/.intermediate-song-importer"
+	@echo "$(YELLOW)Environment Variables:$(END)  JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n"
+	@echo "$(YELLOW)Run Options:$(END)            --rm --network $(PROJECT_NAME)_default"
+	@echo
+	@echo
+	@echo $(YELLOW)$(INFO_HEADER) After configuring docker run profile, configure debug profile with port forwarding 5005:5005 $(END)
+
 #############################################################
 #  Cleaning targets
 #############################################################
