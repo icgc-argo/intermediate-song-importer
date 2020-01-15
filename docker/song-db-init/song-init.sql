@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.12
--- Dumped by pg_dump version 9.6.12
+-- Dumped from database version 9.6.15
+-- Dumped by pg_dump version 9.6.15
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -12,6 +12,7 @@ SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
+SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
@@ -95,7 +96,9 @@ CREATE TYPE public.file_type AS ENUM (
     'TBI',
     'IDX',
     'XML',
-    'TGZ'
+    'TGZ',
+    'CRAM',
+    'CRAI'
 );
 
 
@@ -106,9 +109,9 @@ ALTER TYPE public.file_type OWNER TO postgres;
 --
 
 CREATE TYPE public.gender AS ENUM (
-    'male',
-    'female',
-    'unspecified'
+    'Male',
+    'Female',
+    'Other'
 );
 
 
@@ -133,29 +136,10 @@ CREATE TYPE public.id_type AS ENUM (
 ALTER TYPE public.id_type OWNER TO postgres;
 
 --
--- Name: library_strategy; Type: TYPE; Schema: public; Owner: postgres
+-- Name: legacy_sample_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE public.library_strategy AS ENUM (
-    'WGS',
-    'WXS',
-    'RNA-Seq',
-    'ChIP-Seq',
-    'miRNA-Seq',
-    'Bisulfite-Seq',
-    'Validation',
-    'Amplicon',
-    'Other'
-);
-
-
-ALTER TYPE public.library_strategy OWNER TO postgres;
-
---
--- Name: sample_type; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.sample_type AS ENUM (
+CREATE TYPE public.legacy_sample_type AS ENUM (
     'DNA',
     'FFPE DNA',
     'Amplified DNA',
@@ -165,26 +149,13 @@ CREATE TYPE public.sample_type AS ENUM (
 );
 
 
-ALTER TYPE public.sample_type OWNER TO postgres;
+ALTER TYPE public.legacy_sample_type OWNER TO postgres;
 
 --
--- Name: specimen_class; Type: TYPE; Schema: public; Owner: postgres
+-- Name: legacy_specimen_type; Type: TYPE; Schema: public; Owner: postgres
 --
 
-CREATE TYPE public.specimen_class AS ENUM (
-    'Normal',
-    'Tumour',
-    'Adjacent normal'
-);
-
-
-ALTER TYPE public.specimen_class OWNER TO postgres;
-
---
--- Name: specimen_type; Type: TYPE; Schema: public; Owner: postgres
---
-
-CREATE TYPE public.specimen_type AS ENUM (
+CREATE TYPE public.legacy_specimen_type AS ENUM (
     'Normal - solid tissue',
     'Normal - blood derived',
     'Normal - bone marrow',
@@ -217,7 +188,130 @@ CREATE TYPE public.specimen_type AS ENUM (
 );
 
 
+ALTER TYPE public.legacy_specimen_type OWNER TO postgres;
+
+--
+-- Name: library_strategy; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.library_strategy AS ENUM (
+    'WGS',
+    'WXS',
+    'RNA-Seq',
+    'ChIP-Seq',
+    'miRNA-Seq',
+    'Bisulfite-Seq',
+    'Validation',
+    'Amplicon',
+    'Other'
+);
+
+
+ALTER TYPE public.library_strategy OWNER TO postgres;
+
+--
+-- Name: sample_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.sample_type AS ENUM (
+    'Total DNA',
+    'Amplified DNA',
+    'ctDNA',
+    'Other DNA enrichments',
+    'Total RNA',
+    'Ribo-Zero RNA',
+    'polyA+ RNA',
+    'Other RNA fractions'
+);
+
+
+ALTER TYPE public.sample_type OWNER TO postgres;
+
+--
+-- Name: specimen_class; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.specimen_class AS ENUM (
+    'Normal',
+    'Tumour',
+    'Adjacent normal'
+);
+
+
+ALTER TYPE public.specimen_class OWNER TO postgres;
+
+--
+-- Name: specimen_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.specimen_type AS ENUM (
+    'Normal',
+    'Normal - tissue adjacent to primary tumour',
+    'Primary tumour',
+    'Primary tumour - adjacent to normal',
+    'Primary tumour - additional new primary',
+    'Recurrent tumour',
+    'Metastatic tumour',
+    'Metastatic tumour - metastasis local to lymph node',
+    'Metastatic tumour - metastasis to distant location',
+    'Metastatic tumour - additional metastatic',
+    'Xenograft - derived from primary tumour',
+    'Xenograft - derived from tumour cell line',
+    'Cell line - derived from xenograft tumour',
+    'Cell line - derived from tumour',
+    'Cell line - derived from normal'
+);
+
+
 ALTER TYPE public.specimen_type OWNER TO postgres;
+
+--
+-- Name: tissue_source_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.tissue_source_type AS ENUM (
+    'Blood derived',
+    'Blood derived - bone marrow',
+    'Blood derived - peripheral blood',
+    'Bone marrow',
+    'Buccal cell',
+    'Lymph node',
+    'Solid tissue',
+    'Plasma',
+    'Serum',
+    'Urine',
+    'Cerebrospinal fluid',
+    'Sputum',
+    'Other',
+    'Pleural effusion',
+    'Mononuclear cells from bone marrow',
+    'Saliva',
+    'Skin',
+    'Intestine',
+    'Buffy coat',
+    'Stomach',
+    'Esophagus',
+    'Tonsil',
+    'Spleen',
+    'Bone',
+    'Cerebellum',
+    'Endometrium'
+);
+
+
+ALTER TYPE public.tissue_source_type OWNER TO postgres;
+
+--
+-- Name: tumour_normal_designation_type; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.tumour_normal_designation_type AS ENUM (
+    'Normal',
+    'Tumour'
+);
+
+
+ALTER TYPE public.tumour_normal_designation_type OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -315,7 +409,7 @@ CREATE TABLE public.donor (
     id character varying(36) NOT NULL,
     study_id character varying(36),
     submitter_id text,
-    gender public.gender
+    gender public.gender NOT NULL
 );
 
 
@@ -329,7 +423,9 @@ CREATE TABLE public.sample (
     id character varying(36) NOT NULL,
     specimen_id character varying(36),
     submitter_id text,
-    type public.sample_type
+    legacy_type public.legacy_sample_type,
+    type public.sample_type,
+    matched_normal_submitter_sample_id character varying(255)
 );
 
 
@@ -344,7 +440,10 @@ CREATE TABLE public.specimen (
     donor_id character varying(36),
     submitter_id text,
     class public.specimen_class,
-    type public.specimen_type
+    legacy_type public.legacy_specimen_type,
+    type public.specimen_type,
+    tissue_source public.tissue_source_type,
+    tumour_normal_designation public.tumour_normal_designation_type NOT NULL
 );
 
 
@@ -393,8 +492,9 @@ CREATE TABLE public.file (
     name text,
     size bigint,
     md5 character(32),
+    access public.access_type,
     type public.file_type,
-    access public.access_type
+    data_type character varying(255)
 );
 
 
@@ -536,6 +636,12 @@ ALTER TABLE ONLY public.analysis_schema ALTER COLUMN id SET DEFAULT nextval('pub
 --
 
 COPY public.analysis (id, study_id, type, state, analysis_schema_id, analysis_data_id) FROM stdin;
+fda11e16-2139-4ba6-a11e-162139cba69e	ABC123-CA	\N	PUBLISHED	1	2
+60610159-4f9b-4402-a101-594f9b740217	ABC123-CA	\N	PUBLISHED	1	3
+fdd69e1e-0f80-45b7-969e-1e0f8095b743	ABC123-CA	\N	PUBLISHED	1	4
+de11647c-b797-450d-9164-7cb797050d56	TEST-CA	\N	PUBLISHED	1	5
+3f49f7be-9d78-4be4-89f7-be9d780be494	TEST-CA	\N	PUBLISHED	1	6
+5b64d69d-59b4-4fe0-a4d6-9d59b4bfe027	TEST-CA	\N	PUBLISHED	1	7
 \.
 
 
@@ -544,6 +650,12 @@ COPY public.analysis (id, study_id, type, state, analysis_schema_id, analysis_da
 --
 
 COPY public.analysis_data (id, data) FROM stdin;
+2	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
+3	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
+4	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
+5	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
+6	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
+7	{"info": {"description": "This is extra info in a JSON format"}, "experiment": {"variantCallingTool": "silver bullet", "matchedNormalSampleSubmitterId": "sample-x24-11a"}}
 \.
 
 
@@ -551,7 +663,7 @@ COPY public.analysis_data (id, data) FROM stdin;
 -- Name: analysis_data_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.analysis_data_id_seq', 1, true);
+SELECT pg_catalog.setval('public.analysis_data_id_seq', 7, true);
 
 
 --
@@ -576,6 +688,8 @@ SELECT pg_catalog.setval('public.analysis_schema_id_seq', 2, true);
 --
 
 COPY public.donor (id, study_id, submitter_id, gender) FROM stdin;
+f0a69282-9241-564e-912d-cf3b3ec48599	ABC123-CA	internal_donor_123456789-00	Female
+9a83523b-d59a-5856-ad08-f7db8d43d7df	TEST-CA	internal_donor_123456789-00	Female
 \.
 
 
@@ -583,7 +697,19 @@ COPY public.donor (id, study_id, submitter_id, gender) FROM stdin;
 -- Data for Name: file; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.file (id, analysis_id, study_id, name, size, md5, type, access) FROM stdin;
+COPY public.file (id, analysis_id, study_id, name, size, md5, access, type, data_type) FROM stdin;
+de54fff3-70a8-50c3-aa51-99607bc0d871	fda11e16-2139-4ba6-a11e-162139cba69e	ABC123-CA	example4.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+08a26f1c-3ed6-5361-aeff-e210f4c62e51	fda11e16-2139-4ba6-a11e-162139cba69e	ABC123-CA	example4.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
+569da244-e2f4-5afb-8b8d-602a5cf0a5c1	60610159-4f9b-4402-a101-594f9b740217	ABC123-CA	example5.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+ab99bcea-6360-5664-9967-122b0d8671c8	60610159-4f9b-4402-a101-594f9b740217	ABC123-CA	example5.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
+555c425f-b256-5328-9b66-8338c62f5170	fdd69e1e-0f80-45b7-969e-1e0f8095b743	ABC123-CA	example6.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+bcf73b26-293a-54e5-8934-699e5697c191	fdd69e1e-0f80-45b7-969e-1e0f8095b743	ABC123-CA	example6.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
+8e6b8b22-d70e-5618-b572-f02928638739	de11647c-b797-450d-9164-7cb797050d56	TEST-CA	example1.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+f4d13c0a-4297-57d1-91dd-f78b37ebb958	de11647c-b797-450d-9164-7cb797050d56	TEST-CA	example1.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
+2fa72e42-2688-5073-8aaf-047f14f8e6c3	3f49f7be-9d78-4be4-89f7-be9d780be494	TEST-CA	example2.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+49c7bea3-8c17-5b43-b584-af7b07a26e81	3f49f7be-9d78-4be4-89f7-be9d780be494	TEST-CA	example2.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
+d4781fee-8300-52bd-ad36-3ee9dd453eef	5b64d69d-59b4-4fe0-a4d6-9d59b4bfe027	TEST-CA	example3.vcf.gz	52	9a793e90d0d1e11301ea8da996446e59	open	VCF	SOME_DATA_TYPE
+a6417e81-2d64-5b36-ba1f-fbee89c4a489	5b64d69d-59b4-4fe0-a4d6-9d59b4bfe027	TEST-CA	example3.vcf.gz.idx	25	c03274816eb4907a92b8e5632cd6eb81	open	IDX	SOME_DATA_TYPE
 \.
 
 
@@ -596,6 +722,9 @@ COPY public.flyway_schema_history (installed_rank, version, description, type, s
 2	1.1	added schema	SQL	V1_1__added_schema.sql	675033696	postgres	2019-10-22 19:30:10.625976	30	t
 3	1.2	dynamic schema integration	SPRING_JDBC	db.migration.V1_2__dynamic_schema_integration	\N	postgres	2019-10-22 19:30:10.679764	141	t
 4	1.3	post schema integration	SQL	V1_3__post_schema_integration.sql	1429883245	postgres	2019-10-22 19:30:10.885393	13	t
+5	1.4	file enum update	SQL	V1_4__file_enum_update.sql	1895896985	postgres	2020-01-15 14:22:23.079332	23	t
+6	1.5	donor enum update	SQL	V1_5__donor_enum_update.sql	-452882819	postgres	2020-01-15 14:22:23.133487	17	t
+7	1.6	base schema changes	SQL	V1_6__base_schema_changes.sql	1007233558	postgres	2020-01-15 14:22:23.171658	23	t
 \.
 
 
@@ -604,6 +733,26 @@ COPY public.flyway_schema_history (installed_rank, version, description, type, s
 --
 
 COPY public.info (id, id_type, info) FROM stdin;
+ABC123-CA	Study	{}
+f0a69282-9241-564e-912d-cf3b3ec48599	Donor	{}
+3c049863-5bae-56d4-b313-dcae28a4ae90	Specimen	{}
+1f7eb743-f0c6-55ef-afc3-c3ca1707c301	Sample	{}
+de54fff3-70a8-50c3-aa51-99607bc0d871	File	{}
+08a26f1c-3ed6-5361-aeff-e210f4c62e51	File	{}
+569da244-e2f4-5afb-8b8d-602a5cf0a5c1	File	{}
+ab99bcea-6360-5664-9967-122b0d8671c8	File	{}
+555c425f-b256-5328-9b66-8338c62f5170	File	{}
+bcf73b26-293a-54e5-8934-699e5697c191	File	{}
+TEST-CA	Study	{}
+9a83523b-d59a-5856-ad08-f7db8d43d7df	Donor	{}
+71a9fe8f-f807-5579-aafa-d783eec91cda	Specimen	{}
+c8a5303f-f58f-5c9f-ad2b-6b0b275ab96d	Sample	{}
+8e6b8b22-d70e-5618-b572-f02928638739	File	{}
+f4d13c0a-4297-57d1-91dd-f78b37ebb958	File	{}
+2fa72e42-2688-5073-8aaf-047f14f8e6c3	File	{}
+49c7bea3-8c17-5b43-b584-af7b07a26e81	File	{}
+d4781fee-8300-52bd-ad36-3ee9dd453eef	File	{}
+a6417e81-2d64-5b36-ba1f-fbee89c4a489	File	{}
 \.
 
 
@@ -611,7 +760,9 @@ COPY public.info (id, id_type, info) FROM stdin;
 -- Data for Name: sample; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.sample (id, specimen_id, submitter_id, type) FROM stdin;
+COPY public.sample (id, specimen_id, submitter_id, legacy_type, type, matched_normal_submitter_sample_id) FROM stdin;
+1f7eb743-f0c6-55ef-afc3-c3ca1707c301	3c049863-5bae-56d4-b313-dcae28a4ae90	internal_sample_98024759826836	\N	Total RNA	sample-x24-11a
+c8a5303f-f58f-5c9f-ad2b-6b0b275ab96d	71a9fe8f-f807-5579-aafa-d783eec91cda	internal_sample_98024759826836	\N	Total RNA	sample-x24-11a
 \.
 
 
@@ -620,6 +771,12 @@ COPY public.sample (id, specimen_id, submitter_id, type) FROM stdin;
 --
 
 COPY public.sampleset (analysis_id, sample_id) FROM stdin;
+fda11e16-2139-4ba6-a11e-162139cba69e	1f7eb743-f0c6-55ef-afc3-c3ca1707c301
+60610159-4f9b-4402-a101-594f9b740217	1f7eb743-f0c6-55ef-afc3-c3ca1707c301
+fdd69e1e-0f80-45b7-969e-1e0f8095b743	1f7eb743-f0c6-55ef-afc3-c3ca1707c301
+de11647c-b797-450d-9164-7cb797050d56	c8a5303f-f58f-5c9f-ad2b-6b0b275ab96d
+3f49f7be-9d78-4be4-89f7-be9d780be494	c8a5303f-f58f-5c9f-ad2b-6b0b275ab96d
+5b64d69d-59b4-4fe0-a4d6-9d59b4bfe027	c8a5303f-f58f-5c9f-ad2b-6b0b275ab96d
 \.
 
 
@@ -627,7 +784,9 @@ COPY public.sampleset (analysis_id, sample_id) FROM stdin;
 -- Data for Name: specimen; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.specimen (id, donor_id, submitter_id, class, type) FROM stdin;
+COPY public.specimen (id, donor_id, submitter_id, class, legacy_type, type, tissue_source, tumour_normal_designation) FROM stdin;
+3c049863-5bae-56d4-b313-dcae28a4ae90	f0a69282-9241-564e-912d-cf3b3ec48599	internal_specimen_9b73gk8s02dk	\N	\N	Primary tumour	Solid tissue	Tumour
+71a9fe8f-f807-5579-aafa-d783eec91cda	9a83523b-d59a-5856-ad08-f7db8d43d7df	internal_specimen_9b73gk8s02dk	\N	\N	Primary tumour	Solid tissue	Tumour
 \.
 
 
@@ -637,6 +796,8 @@ COPY public.specimen (id, donor_id, submitter_id, class, type) FROM stdin;
 
 COPY public.study (id, name, description, organization) FROM stdin;
 ABC123	\N	\N	\N
+ABC123-CA	\N	\N	\N
+TEST-CA	\N	\N	\N
 \.
 
 
