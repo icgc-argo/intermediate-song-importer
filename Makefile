@@ -1,16 +1,23 @@
 .PHONY:
 
+# Override this variable to 1, for debug mode
+DEMO_MODE := 0
+FORCE := 0
+
 # Required System files
 DOCKER_COMPOSE_EXE := $(shell which docker-compose)
 CURL_EXE := $(shell which curl)
+MVN_EXE := $(shell which mvn)
 
 # Variables
+DOCKERFILE_NAME := $(shell if [ $(DEMO_MODE) -eq 1 ]; then echo Dockerfile; else echo Dockerfile.dev; fi)
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 MY_UID := $$(id -u)
 MY_GID := $$(id -g)
 THIS_USER := $(MY_UID):$(MY_GID)
 ACCESS_TOKEN := f69b726d-d40f-4261-b105-1ec7e6bf04d5
 PROJECT_NAME := $(shell echo $(ROOT_DIR) | sed 's/.*\///g')
+PROJECT_VERSION := $(shell $(MVN_EXE) -f $(ROOT_DIR) help:evaluate -Dexpression=project.version -q -DforceStdout 2>&1  | tail -1)
 
 # STDOUT Formatting
 RED := $$(echo  "\033[0;31m")
@@ -23,6 +30,7 @@ DONE_MESSAGE := $(YELLOW)$(INFO_HEADER) "- done\n" $(END)
 # Paths
 DOCKER_DIR := $(ROOT_DIR)/docker
 SCRATCH_DIR := $(DOCKER_DIR)/scratch/
+IMPORTER_DIST_FILE := $(ROOT_DIR)/target/intermediate-song-importer-$(PROJECT_VERSION)-dist.tar.gz
 RETRY_CMD := $(DOCKER_DIR)/retry-command.sh
 SCORE_SERVER_LOGS_DIR := $(SCRATCH_DIR)/score-server-logs
 SCORE_CLIENT_LOGS_DIR := $(SCRATCH_DIR)/score-client-logs
@@ -41,10 +49,15 @@ LOG_DIRS := $(SCORE_SERVER_LOGS_DIR) $(SCORE_CLIENT_LOGS_DIR) $(SONG_SERVER_LOGS
 
 
 # Commands
-DOCKER_COMPOSE_CMD := MY_UID=$(MY_UID) MY_GID=$(MY_GID) $(DOCKER_COMPOSE_EXE) -f $(ROOT_DIR)/docker-compose.yml
+DOCKER_COMPOSE_CMD := echo "*********** DEMO_MODE = $(DEMO_MODE) **************" \
+	&& echo "*********** FORCE = $(FORCE) **************" \
+	&& DOCKERFILE_NAME=$(DOCKERFILE_NAME) MY_UID=$(MY_UID) MY_GID=$(MY_GID) \
+	$(DOCKER_COMPOSE_EXE) -f $(ROOT_DIR)/docker-compose.yml
 SONG_CLIENT_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) song-client bin/sing
+IMPORTER_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) intermediate-song-importer bin/intermediate-song-importer
 SCORE_CLIENT_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) score-client bin/score-client
 DC_UP_CMD := $(DOCKER_COMPOSE_CMD) up -d --build
+MVN_CMD := $(MVN_EXE) -f $(ROOT_DIR)/pom.xml
 
 #############################################################
 # Internal Targets
@@ -154,13 +167,27 @@ init-log-dirs:
 	@echo $(YELLOW)$(INFO_HEADER) "Initializing log directories" $(END);
 	@mkdir -p $(LOG_DIRS)
 
+# Package the cli using maven. Affected by DEMO_MODE
+package: 
+	@if [ $(DEMO_MODE) -eq 0 ] && [ ! -e $(IMPORTER_DIST_FILE) ] ; then \
+		echo $(YELLOW)$(INFO_HEADER) "Running maven package" $(END); \
+		$(MVN_CMD) package -DskipTests; \
+	elif [ $(DEMO_MODE) -ne 0 ]; then \
+		echo $(YELLOW)$(INFO_HEADER) "Skipping maven package since DEMO_MODE=$(DEMO_MODE)" $(END); \
+	elif [ $(FORCE) -eq 1 ]; then \
+		echo $(YELLOW)$(INFO_HEADER) "Forcefully runnint maven package since FORCE=$(FORCE)" $(END); \
+		$(MVN_CMD) package -DskipTests; \
+	else \
+		echo $(YELLOW)$(INFO_HEADER) "Skipping maven package since files exist: $(IMPORTER_DIST_FILE)" $(END); \
+	fi
+
 #############################################################
 #  Docker targets
 #############################################################
 
-# Start ego, song, score and object-storage.
-start-services: _setup
-	@echo $(YELLOW)$(INFO_HEADER) "Starting all services: ego, score, song, score and object-storage" $(END)
+# Start ego, song, score and object-storage. Affected by DEMO_MODE
+start-services: _setup package
+	@echo $(YELLOW)$(INFO_HEADER) "Starting all services: ego, score, song, interemediate-song and object-storage" $(END)
 	@$(DC_UP_CMD) ego-api score-server song-server intermediate-song-server object-storage 
 	@$(MAKE) _ping_song_server
 	@$(MAKE) _ping_intermediate_song_server
@@ -191,5 +218,7 @@ show-score-server-logs:
 #  Client targets
 #############################################################
 
+test: start-services
+	@$(IMPORTER_CMD) run 
 
 

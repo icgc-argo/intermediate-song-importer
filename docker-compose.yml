@@ -182,6 +182,14 @@ services:
       - score-server
     volumes:
       - "./docker/scratch/intermediate-song-server-logs:/song-server/logs"
+  intermediate-song-importer:
+    build:
+      context: ./
+      dockerfile: "$DOCKERFILE_NAME"
+    volumes:
+      - "./docker/intermediate-song-importer-config:/root/.intermediate-song-importer"
+      - "./docker/intermediate-song-importer-data:/intermediate-song-importer/input"
+    command: ./bin/intermediate-song-importer
 
 volumes:
     object-storage-data: {}
