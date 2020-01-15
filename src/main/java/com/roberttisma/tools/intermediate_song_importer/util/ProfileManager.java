@@ -20,7 +20,6 @@ import lombok.val;
 
 @Slf4j
 public class ProfileManager {
-
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   public static Config readConfig() throws IOException {

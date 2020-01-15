@@ -10,6 +10,7 @@ import picocli.CommandLine.Command;
 @RequiredArgsConstructor
 @Command(
     name = "intermediate-song-importer",
+    mixinStandardHelpOptions = true,
     subcommands = {ConfigCommand.class, RunCommand.class},
     description = "Main command")
 public class IntermediateSongImporterCommand implements Callable<Integer> {

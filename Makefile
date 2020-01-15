@@ -234,4 +234,11 @@ show-score-server-logs:
 test: start-services
 	@$(IMPORTER_CMD) run 
 
+client:
+	@$(MVN_CMD) clean package -DskipTests
+	@tar zxvf target/*.tar.gz -C target
+
+
+
+
 

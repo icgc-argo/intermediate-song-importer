@@ -2,7 +2,7 @@ package com.roberttisma.tools.intermediate_song_importer;
 
 import static java.lang.String.format;
 
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig.SongConfig.DBConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.DBConfig;
 import java.io.Closeable;
 import java.util.Map;
 import lombok.NonNull;

@@ -17,52 +17,16 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class ProfileConfig implements Mergable<ProfileConfig> {
   private String name;
-  private String accessToken;
-  private String sourceUrl;
-  private SongConfig targetSong;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class SongConfig implements Mergable<SongConfig> {
-    private String serverUrl;
-    private DBConfig db;
+  @Builder.Default private SourceSongConfig sourceSong = new SourceSongConfig();
 
-    @Override
-    public void merge(@NonNull SongConfig songConfig) {
-      mergeField(SongConfig::getServerUrl, SongConfig::setServerUrl, this, songConfig);
-      mergeMergableField(SongConfig::getDb, this, songConfig);
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class DBConfig implements Mergable<DBConfig> {
-      private String dbname;
-      private String hostname;
-      private String port;
-      private String username;
-      private String password;
-
-      @Override
-      public void merge(@NonNull DBConfig dbConfig) {
-        mergeField(DBConfig::getDbname, DBConfig::setDbname, this, dbConfig);
-        mergeField(DBConfig::getHostname, DBConfig::setHostname, this, dbConfig);
-        mergeField(DBConfig::getUsername, DBConfig::setUsername, this, dbConfig);
-        mergeField(DBConfig::getPassword, DBConfig::setPassword, this, dbConfig);
-        mergeField(DBConfig::getPort, DBConfig::setPort, this, dbConfig);
-      }
-    }
-  }
+  @Builder.Default private TargetSongConfig targetSong = new TargetSongConfig();
 
   @Override
   public void merge(@NonNull ProfileConfig mergeIn) {
     mergeProfileField(ProfileConfig::getName, ProfileConfig::setName, mergeIn);
-    mergeProfileField(ProfileConfig::getAccessToken, ProfileConfig::setAccessToken, mergeIn);
-    mergeProfileField(ProfileConfig::getSourceUrl, ProfileConfig::setSourceUrl, mergeIn);
     mergeMergableField(ProfileConfig::getTargetSong, this, mergeIn);
+    mergeMergableField(ProfileConfig::getSourceSong, this, mergeIn);
   }
 
   private void mergeProfileField(

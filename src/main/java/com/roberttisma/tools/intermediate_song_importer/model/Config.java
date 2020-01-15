@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
 
 @Data
 @Builder
@@ -15,5 +14,5 @@ import lombok.Singular;
 @AllArgsConstructor
 public class Config {
 
-  @Singular private List<ProfileConfig> profiles = newArrayList();
+  @Builder.Default private List<ProfileConfig> profiles = newArrayList();
 }
