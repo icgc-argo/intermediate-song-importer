@@ -1,20 +1,19 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-
-import java.nio.file.Path;
-import java.util.concurrent.Callable;
-
 import static com.roberttisma.tools.intermediate_song_importer.Factory.createMigrationService;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkDirectoryExists;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.streamFilesInDir;
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
 import static java.lang.String.format;
+
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import java.nio.file.Path;
+import java.util.concurrent.Callable;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Slf4j
 @RequiredArgsConstructor
