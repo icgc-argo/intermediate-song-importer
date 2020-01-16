@@ -5,13 +5,13 @@ import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readF
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static java.util.stream.Collectors.toMap;
 
-import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
 import java.io.Closeable;
 import java.nio.file.Path;
+import java.util.List;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -42,20 +42,20 @@ public class MigrationService implements Closeable {
 
       // Read source analysis
       val sourceAnalysisId = extractAnalysisId(jsonFile);
-      val sourceAnalysis = sourceApi.getAnalysis(studyId, sourceAnalysisId);
+      val sourceAnalysisFiles = sourceApi.getAnalysisFiles(studyId, sourceAnalysisId);
 
       // Submit target payload to target song
       val targetAnalysisId = targetApi.submit(studyId, payloadAsString).getAnalysisId();
-      val targetAnalysis = targetApi.getAnalysis(studyId, targetAnalysisId);
+      val targetAnalysisFiles = targetApi.getAnalysisFiles(studyId, targetAnalysisId);
 
       // Update object ids via backdoor db
-      val numLinesChanges = updateAnalysisFiles(sourceAnalysis, targetAnalysis);
+      val numLinesChanges = updateAnalysisFiles(sourceAnalysisFiles, targetAnalysisFiles);
 
       // Assert all files were updated
       checkImporter(
-          numLinesChanges == targetAnalysis.getFiles().size(),
+          numLinesChanges == targetAnalysisFiles.size(),
           "There are %s files, however only %s were updated",
-          targetAnalysis.getFiles().size(),
+          targetAnalysisFiles.size(),
           numLinesChanges);
 
       // Publish the target analysis
@@ -76,10 +76,9 @@ public class MigrationService implements Closeable {
     dbUpdater.close();
   }
 
-  private int updateAnalysisFiles(Analysis source, Analysis target) {
-    val targetMap =
-        target.getFiles().stream().collect(toMap(FileDTO::getFileName, FileDTO::getObjectId));
-    return source.getFiles().stream()
+  private int updateAnalysisFiles(List<FileDTO> sourceFiles, List<FileDTO> targetFiles) {
+    val targetMap = targetFiles.stream().collect(toMap(FileDTO::getFileName, FileDTO::getObjectId));
+    return sourceFiles.stream()
         .mapToInt(
             s -> {
               checkImporter(
@@ -87,7 +86,7 @@ public class MigrationService implements Closeable {
                   "No matching filename '%s' for source analysisId '%s' and target analysisId '%s'",
                   s.getFileName(),
                   s.getAnalysisId(),
-                  target.getAnalysisId());
+                  s.getAnalysisId());
               val targetObjectId = targetMap.get(s.getFileName());
               return dbUpdater.update(s.getObjectId(), targetObjectId);
             })
