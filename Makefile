@@ -54,7 +54,7 @@ DOCKER_COMPOSE_CMD := echo "*********** DEMO_MODE = $(DEMO_MODE) **************"
 	&& DOCKERFILE_NAME=$(DOCKERFILE_NAME) MY_UID=$(MY_UID) MY_GID=$(MY_GID) \
 	$(DOCKER_COMPOSE_EXE) -f $(ROOT_DIR)/docker-compose.yml
 SONG_CLIENT_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) song-client bin/sing
-IMPORTER_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) intermediate-song-importer bin/intermediate-song-importer
+IMPORTER_CMD := $(DOCKER_COMPOSE_CMD) run --rm intermediate-song-importer ./bin/intermediate-song-importer
 SCORE_CLIENT_CMD := $(DOCKER_COMPOSE_CMD) run --rm -u $(THIS_USER) score-client bin/score-client
 DC_UP_CMD := $(DOCKER_COMPOSE_CMD) up -d --build
 MVN_CMD := $(MVN_EXE) -f $(ROOT_DIR)/pom.xml
@@ -199,7 +199,14 @@ package:
 #############################################################
 
 # Start ego, song, score and object-storage. Affected by DEMO_MODE
-start-services: _setup package
+#start-services: _setup package 
+
+build-importer: 
+	@echo $(YELLOW)$(INFO_HEADER) "Forcefully building importer container" $(END)
+	@$(MVN_CMD) package -DskipTests
+	@$(DOCKER_COMPOSE_CMD) build intermediate-song-importer
+
+start-services: _setup build-importer
 	@echo $(YELLOW)$(INFO_HEADER) "Starting all services: ego, score, song, interemediate-song and object-storage" $(END)
 	@$(DC_UP_CMD) ego-api score-server song-server intermediate-song-server object-storage 
 	@$(MAKE) _ping_song_server
@@ -207,11 +214,6 @@ start-services: _setup package
 	@$(MAKE) _ping_score_server
 	@$(MAKE) _setup-object-storage
 	@echo $(YELLOW)$(INFO_HEADER) Succesfully started services! $(END)
-
-build-importer: 
-	@echo $(YELLOW)$(INFO_HEADER) "Forcefully building importer container" $(END)
-	@$(MVN_CMD) package -DskipTests
-	@$(DOCKER_COMPOSE_CMD) build intermediate-song-importer
 
 #############################################################
 #  Logging Targets
@@ -236,21 +238,17 @@ show-score-server-logs:
 #  Client targets
 #############################################################
 
-test: start-services
-	@$(IMPORTER_CMD) run 
-
-fresh-client:
-	@$(MVN_CMD) clean package -DskipTests
-	@tar zxvf target/*.tar.gz -C target
-
 refresh-intermediate-song-db:
 	@$(DOCKER_COMPOSE_CMD) exec intermediate-song-db sh -c "psql -U postgres song < /refresh/refresh-song-db.sql"
 
-client:
-	@rm -rf  target/intermediate-song-importer*
-	@$(MVN_CMD) package -DskipTests
-	@tar zxvf target/*.tar.gz -C target
+build:
+	@$(MVN_CMD) clean package -DskipTests
+	@tar zxvf target/*.tar.gz -C /tmp
+	@mv /tmp/intermediate-song-importer* target/dist
+	@echo "Build complete! Start by running:  ./target/dist/bin/intermediate-song-importer --help"
 
+test: start-services refresh-intermediate-song-db
+	@$(IMPORTER_CMD) run -p test -d /intermediate-song-importer/input
 
 
 

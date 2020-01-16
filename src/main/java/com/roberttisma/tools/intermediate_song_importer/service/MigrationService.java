@@ -11,7 +11,6 @@ import bio.overture.song.sdk.SongApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.file.Path;
 import lombok.Builder;
 import lombok.NonNull;
@@ -47,13 +46,21 @@ public class MigrationService implements Closeable {
 
       // Submit target payload to target song
       val targetAnalysisId = targetApi.submit(studyId, payloadAsString).getAnalysisId();
+      val targetAnalysis = targetApi.getAnalysis(studyId, targetAnalysisId);
 
       // Update object ids via backdoor db
-      val targetAnalysis = targetApi.getAnalysis(studyId, targetAnalysisId);
       val numLinesChanges = updateAnalysisFiles(sourceAnalysis, targetAnalysis);
 
-      // Publish
+      // Assert all files were updated
+      checkImporter(
+          numLinesChanges == targetAnalysis.getFiles().size(),
+          "There are %s files, however only %s were updated",
+          targetAnalysis.getFiles().size(),
+          numLinesChanges);
+
+      // Publish the target analysis
       targetApi.publish(studyId, targetAnalysisId, false);
+
       log.info("[PROCESSING_SUCCESS] filename='{}'", jsonFile.toString());
     } catch (Throwable t) {
       log.error(
@@ -65,7 +72,7 @@ public class MigrationService implements Closeable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     dbUpdater.close();
   }
 
