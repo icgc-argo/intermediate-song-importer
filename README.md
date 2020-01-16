@@ -41,4 +41,4 @@ After completing configuration, you can run with
 ```bash
 ./target/dist/bin/intermediate-song-importer run -p myprofile -d <inputDir>
 ```
-where `inputDir` contains files labeled with `<analysisId>.json`
+where `inputDir` contains files with names formatted to `<analysisId>.json`
