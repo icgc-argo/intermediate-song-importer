@@ -42,3 +42,16 @@ After completing configuration, you can run with
 ./target/dist/bin/intermediate-song-importer run -p myprofile -d <inputDir>
 ```
 where `inputDir` contains files with names formatted to `<analysisId>.json`
+
+## Real Scenario
+After initializing the `argo-meta` submodule with
+```bash
+git submodule update --init --recursive
+```
+
+and creating the studyId `PACA-CA`, the following command can be run to execute the import
+```bash
+./target/dist/bin/intermediate-song-importer config set -p myprofile source -u https://song.cancercollaboratory.org -a <access token with collab.WRITE scope>
+./target/dist/bin/intermediate-song-importer config set -p myprofile target -u <intermediate-song-url> -a <access token for intermediate-song> -dn <dbname> -du <username> -dq <password> -dh <hostname> -dp <port>
+./target/dist/bin/intermediate-song-importer run -p myprofile -d ../../../argo-meta/icgc_song_payloads/PACA-CA
+```
