@@ -1,0 +1,3 @@
+[submodule "argo-meta"]
+	path = argo-meta
+	url = https://github.com/icgc-argo/argo-meta
