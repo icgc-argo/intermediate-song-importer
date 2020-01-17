@@ -25,7 +25,11 @@ public class ImporterException extends RuntimeException {
 
   public static void checkImporter(boolean expression, String formattedString, Object... args) {
     if (!expression) {
-      throw new ImporterException(format(formattedString, args));
+      throw buildImporterException(formattedString, args);
     }
+  }
+
+  public static ImporterException buildImporterException(String formattedString, Object... args) {
+    return new ImporterException(format(formattedString, args));
   }
 }

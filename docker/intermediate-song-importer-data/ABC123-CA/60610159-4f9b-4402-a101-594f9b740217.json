@@ -1,5 +1,5 @@
 {
-  "studyId": "TEST-CA",
+  "studyId": "XYZ456-CA",
   "analysisType": {
     "name": "variantCall"
   },
@@ -26,7 +26,7 @@
   ],
   "files": [
     {
-      "fileName": "example2.vcf.gz",
+      "fileName": "example5.vcf.gz",
       "dataType": "SOME_DATA_TYPE",
       "fileSize": 52,
       "fileMd5sum": "9a793e90d0d1e11301ea8da996446e59",
@@ -34,7 +34,7 @@
       "fileType": "VCF"
     },
     {
-      "fileName": "example2.vcf.gz.idx",
+      "fileName": "example5.vcf.gz.idx",
       "dataType": "SOME_DATA_TYPE",
       "fileSize": 25,
       "fileMd5sum": "c03274816eb4907a92b8e5632cd6eb81",

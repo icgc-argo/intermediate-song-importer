@@ -1,16 +1,20 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
-
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import java.util.concurrent.Callable;
+import com.roberttisma.tools.intermediate_song_importer.util.JsonUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.Callable;
+
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkFileExists;
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
+import static java.util.Objects.isNull;
 
 @Getter
 @RequiredArgsConstructor
@@ -24,18 +28,32 @@ public class ConfigSetCommand implements Callable<Integer> {
   @Option(
       names = {"-p", "--profile"},
       description = "Profile to set",
-      required = false)
+      required = true)
   private String profileName;
+
+  @Option(
+      names = {"-f", "--file"},
+      description = "Input profile file. Note: --profile value overrides the name field",
+      required = false)
+  private Path inputFile;
 
   @Override
   public Integer call() throws Exception {
-    if (isNullOrEmpty(profileName)) {
-      CommandLine.usage(this, System.out);
+    ProfileConfig profileConfig = null;
+    if (isNull(inputFile)){
+      profileConfig = ProfileConfig.builder().name(profileName).build();
     } else {
-      val profileConfig = ProfileConfig.builder().name(profileName).build();
-      val status = saveProfile(profileConfig);
-      System.out.println(status);
+      profileConfig = readProfileConfigFile();
+      profileConfig.setName(profileName);
     }
+    val status = saveProfile(profileConfig);
+    System.out.println(status);
     return 0;
   }
+
+  private ProfileConfig readProfileConfigFile() throws IOException {
+    checkFileExists(inputFile);
+    return JsonUtils.mapper().readValue(inputFile.toFile(), ProfileConfig.class);
+  }
+
 }

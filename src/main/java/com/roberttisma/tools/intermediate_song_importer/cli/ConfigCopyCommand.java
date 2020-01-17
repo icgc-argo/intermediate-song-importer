@@ -1,6 +1,6 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.deleteProfile;
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.copyProfile;
 
 import com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException;
 import java.util.concurrent.Callable;
@@ -11,20 +11,26 @@ import picocli.CommandLine.Option;
 
 @Slf4j
 @RequiredArgsConstructor
-@Command(name = "rm", mixinStandardHelpOptions = true, description = "Deletes a profile")
-public class ConfigDeleteCommand implements Callable<Integer> {
+@Command(name = "cp", mixinStandardHelpOptions = true, description = "Copies a profile")
+public class ConfigCopyCommand implements Callable<Integer> {
 
   @Option(
       names = {"-p", "--profile"},
-      description = "Profile to delete",
+      description = "Profile to copy",
       required = true)
   private String profileName;
+
+  @Option(
+      names = {"-n", "--name"},
+      description = "Name of copy",
+      required = true)
+  private String copyName;
 
   @Override
   public Integer call() throws Exception {
     try {
-      deleteProfile(profileName);
-      System.out.println("Deleted profile " + profileName);
+      copyProfile(profileName, copyName);
+      System.out.println("Copied profile " + profileName + " to " + copyName);
     } catch (ImporterException e) {
       log.error(e.getMessage());
       System.err.println(e.getMessage());

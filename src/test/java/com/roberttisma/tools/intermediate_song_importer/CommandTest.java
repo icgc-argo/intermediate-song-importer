@@ -7,10 +7,9 @@ import picocli.CommandLine;
 public class CommandTest {
 
   @Test
-  public void testrob() {
-    //    run("config get -l");
-//    run("run -p rob -d ./");
-    run("run -p devtest -d /home/rtisma/Downloads/testpayloads");
+  public void testCommand() {
+    run("config set -p test -f docker/profile-config.json");
+    run("run -p test2 -d  docker/intermediate-song-importer-data");
   }
 
   private void run(String command) {

@@ -1,22 +1,23 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
-import static java.lang.String.format;
-import static java.nio.file.Files.createDirectories;
-import static java.nio.file.Files.exists;
-import static java.nio.file.Files.isDirectory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roberttisma.tools.intermediate_song_importer.model.Config;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static java.lang.String.format;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 
 @Slf4j
 public class ProfileManager {
@@ -38,6 +39,15 @@ public class ProfileManager {
   public static Optional<ProfileConfig> findProfile(
       @NonNull Config config, @NonNull String profileName) {
     return config.getProfiles().stream().filter(x -> x.getName().equals(profileName)).findFirst();
+  }
+
+  public static void copyProfile(@NonNull String profileName, @NonNull String copyName)
+      throws IOException {
+    var config = readConfig();
+    checkProfileExist(config, profileName);
+    val profile = findProfile(profileName).get();
+    profile.setName(copyName);
+    saveProfile(profile);
   }
 
   public static void deleteProfile(@NonNull String profileName) throws IOException {

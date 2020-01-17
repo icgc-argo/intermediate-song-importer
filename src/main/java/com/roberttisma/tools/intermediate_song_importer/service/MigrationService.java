@@ -1,17 +1,10 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
-import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
-import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
-import static java.util.stream.Collectors.toMap;
-
+import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
-import java.io.Closeable;
-import java.nio.file.Path;
-import java.util.List;
+import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -19,11 +12,22 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.io.Closeable;
+import java.nio.file.Path;
+import java.util.List;
+
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
+import static java.util.stream.Collectors.toMap;
+
 @Value
 @Slf4j
 @Builder
 public class MigrationService implements Closeable {
 
+  @NonNull private final StudyService sourceStudyService;
+  @NonNull private final StudyService targetStudyService;
   @NonNull private final SongApi sourceApi;
   @NonNull private final SongApi targetApi;
   @NonNull private final DBUpdater dbUpdater;
@@ -31,35 +35,20 @@ public class MigrationService implements Closeable {
   @SneakyThrows
   public void migrate(@NonNull Path jsonFile) {
     try {
-      checkImporter(
-          jsonFile.toString().endsWith(".json"),
-          "The file '%s' is not a json file",
-          jsonFile.toString());
-      // Read source file and get study
-      val payloadAsString = readFileContent(jsonFile);
-      val payloadAsJson = mapper().readTree(payloadAsString);
-      val studyId = extractStudyId(payloadAsJson);
+      // get source data
+      val sourceData = processSourceData(jsonFile);
 
-      // Read source analysis
-      val sourceAnalysisId = extractAnalysisId(jsonFile);
-      val sourceAnalysisFiles = sourceApi.getAnalysisFiles(studyId, sourceAnalysisId);
+      // Get source files
+      val sourceAnalysisFiles = getSourceAnalysisFiles(sourceData);
 
-      // Submit target payload to target song
-      val targetAnalysisId = targetApi.submit(studyId, payloadAsString).getAnalysisId();
-      val targetAnalysisFiles = targetApi.getAnalysisFiles(studyId, targetAnalysisId);
+      // Get target analysis
+      val targetAnalysis = submitTargetPayload(jsonFile);
 
       // Update object ids via backdoor db
-      val numLinesChanges = updateAnalysisFiles(sourceAnalysisFiles, targetAnalysisFiles);
-
-      // Assert all files were updated
-      checkImporter(
-          numLinesChanges == targetAnalysisFiles.size(),
-          "There are %s files, however only %s were updated",
-          targetAnalysisFiles.size(),
-          numLinesChanges);
+      updateAnalysisFiles(sourceAnalysisFiles, targetAnalysis.getFiles());
 
       // Publish the target analysis
-      targetApi.publish(studyId, targetAnalysisId, false);
+      publishTargetAnalysis(targetAnalysis);
 
       log.info("[PROCESSING_SUCCESS] filename='{}'", jsonFile.toString());
     } catch (Throwable t) {
@@ -76,29 +65,74 @@ public class MigrationService implements Closeable {
     dbUpdater.close();
   }
 
-  private int updateAnalysisFiles(List<FileDTO> sourceFiles, List<FileDTO> targetFiles) {
-    val targetMap = targetFiles.stream().collect(toMap(FileDTO::getFileName, FileDTO::getObjectId));
-    return sourceFiles.stream()
-        .mapToInt(
-            s -> {
-              checkImporter(
-                  targetMap.containsKey(s.getFileName()),
-                  "No matching filename '%s' for source analysisId '%s' and target analysisId '%s'",
-                  s.getFileName(),
-                  s.getAnalysisId(),
-                  s.getAnalysisId());
-              val targetObjectId = targetMap.get(s.getFileName());
-              return dbUpdater.update(s.getObjectId(), targetObjectId);
-            })
-        .sum();
+  private void publishTargetAnalysis(Analysis target) {
+    targetApi.publish(target.getStudyId(), target.getAnalysisId(), false);
   }
 
-  private static String extractAnalysisId(Path file) {
+  @SneakyThrows
+  private Analysis submitTargetPayload(Path jsonFile) {
+    val targetPayload = readFileContent(jsonFile);
+    val targetStudyId = extractStudyId(targetPayload);
+
+    // Create the study if it does not exist
+    if (!targetStudyService.isStudyExist(targetStudyId)) {
+      targetStudyService.createStudy(targetStudyId);
+    }
+
+    val targetAnalysisId = targetApi.submit(targetStudyId, targetPayload).getAnalysisId();
+    return targetApi.getAnalysis(targetStudyId, targetAnalysisId);
+  }
+
+  private List<FileDTO> getSourceAnalysisFiles(SourceData d) {
+    return sourceApi.getAnalysisFiles(d.getStudyId(), d.getAnalysisId());
+  }
+
+  private void updateAnalysisFiles(List<FileDTO> sourceFiles, List<FileDTO> targetFiles) {
+    val sourceMap = sourceFiles.stream().collect(toMap(FileDTO::getFileName, FileDTO::getObjectId));
+    val numLinesChanges =
+        targetFiles.stream()
+            .mapToInt(
+                t -> {
+                  checkImporter(
+                      sourceMap.containsKey(t.getFileName()),
+                      "No matching filename '%s' for target analysisId '%s'",
+                      t.getFileName(),
+                      t.getAnalysisId());
+                  val sourceObjectId = sourceMap.get(t.getFileName());
+                  return dbUpdater.update(sourceObjectId, t.getObjectId());
+                })
+            .sum();
+
+    // Assert all files were updated
+    checkImporter(
+        numLinesChanges == targetFiles.size(),
+        "There are %s files, however only %s were updated",
+        targetFiles.size(),
+        numLinesChanges);
+  }
+
+  private SourceData processSourceData(Path file) {
+    val analysisId = parseAnalysisId(file);
+    val studyId = sourceStudyService.getStudyForAnalysisId(analysisId);
+    return SourceData.builder().analysisId(analysisId).studyId(studyId).build();
+  }
+
+  private static String parseAnalysisId(Path file) {
+    checkFileNameFormat(file);
     return file.getFileName().toString().replaceAll("\\.json$", "");
   }
 
-  private static String extractStudyId(JsonNode j) {
+  @SneakyThrows
+  private static String extractStudyId(String payload) {
+    val j= mapper().readTree(payload);
     checkImporter(j.has("studyId"), "json missing the studyId field");
     return j.path("studyId").asText();
+  }
+
+  private static void checkFileNameFormat(Path targetPayloadFile) {
+    checkImporter(
+        targetPayloadFile.toString().endsWith(".json"),
+        "The file '%s' is not a json file",
+        targetPayloadFile.toString());
   }
 }
