@@ -15,6 +15,13 @@ make build
 make test
 ```
 
+## Debugging using Docker
+```bash
+make clean build start-services
+```
+After setting debug breakpoints via the IDE, the test `testCommand` located in the `CommandTest.java` file, can be run in debug mode.
+
+
 ## Configuration
 After building, you can create 
 ```bash
@@ -54,4 +61,21 @@ and creating the studyId `PACA-CA`, the following command can be run to execute 
 ./target/dist/bin/intermediate-song-importer config set -p myprofile source -u https://song.cancercollaboratory.org -a <access token with collab.WRITE scope>
 ./target/dist/bin/intermediate-song-importer config set -p myprofile target -u <intermediate-song-url> -a <access token for intermediate-song> -dn <dbname> -du <username> -dq <password> -dh <hostname> -dp <port>
 ./target/dist/bin/intermediate-song-importer run -p myprofile -d ../../../argo-meta/icgc_song_payloads/PACA-CA
+```
+
+## Input dir rules
+The `inputDir` directory, must contain json file that represent the payload to be submitted to the target song server (i.e intermediate song server). 
+The filename must match the convention:
+
+`<sourceAnalysisId>.json`
+
+where  `sourceAnalysisId` implies an existing analysisId from the source (or reference) song server.
+The contents of the payload files can contain any studyId (which will be created on the target if it does not exist) and the payloads them selves will be `submitted` to the target song server as is. It is important to note, that the files from the payload `MUST` be a subset of the files associated with `sourceAnalysisId`.
+
+
+## Misc
+### Nuking the intermediate-song-db
+When testing or when debugging, it can be useful to refresh or nuke the intermediate-song-db. To do this run:
+```bash
+make refresh-intermediate-song-db
 ```

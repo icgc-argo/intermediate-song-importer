@@ -247,7 +247,7 @@ build:
 	@mv /tmp/intermediate-song-importer* target/dist
 	@echo "Build complete! Start by running:  ./target/dist/bin/intermediate-song-importer --help"
 
-test: start-services refresh-intermediate-song-db
+test: start-services build-importer refresh-intermediate-song-db
 	@$(IMPORTER_CMD) run -p test -d /intermediate-song-importer/input
 
 
