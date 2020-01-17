@@ -7,8 +7,8 @@ import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.val;
 
 import java.nio.file.Path;
@@ -19,12 +19,12 @@ import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.ma
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
 import static java.lang.String.format;
 
-@Value
 @Builder
+@RequiredArgsConstructor
 public class SourceSongService {
 
-  @NonNull private SongConfig config;
   @NonNull private SongApi api;
+  @NonNull private SongConfig config;
 
   public List<FileDTO> getSourceAnalysisFiles(@NonNull Path payloadFile){
     val sourceData = processSourceData(payloadFile);
@@ -48,7 +48,7 @@ public class SourceSongService {
     val contentNode = parseContent(j);
     checkImporter(!contentNode.isEmpty(),
         "The analysisId '%s' does not exist at '%s'",
-        analysisId, getConfig().getServerUrl());
+        analysisId, config.getServerUrl());
     return contentNode.path(0).path("projectCode").asText();
   }
 

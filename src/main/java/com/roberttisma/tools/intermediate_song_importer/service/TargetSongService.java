@@ -7,8 +7,8 @@ import com.roberttisma.tools.intermediate_song_importer.model.Study;
 import kong.unirest.HttpResponse;
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.val;
 
 import java.io.IOException;
@@ -23,12 +23,12 @@ import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.g
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.post;
 import static java.lang.String.format;
 
-@Value
 @Builder
+@RequiredArgsConstructor
 public class TargetSongService {
 
-  @NonNull private SongConfig config;
   @NonNull private SongApi api;
+  @NonNull private SongConfig config;
 
   public Analysis submitTargetPayload(@NonNull Path payloadFile) throws IOException {
     val targetPayload = readFileContent(payloadFile);
@@ -43,7 +43,7 @@ public class TargetSongService {
     return api.getAnalysis(targetStudyId, targetAnalysisId);
   }
 
-  public void publishTargetAnalysis(Analysis a) {
+  public void publishTargetAnalysis(@NonNull Analysis a) {
     api.publish(a.getStudyId(), a.getAnalysisId(), false);
   }
 
