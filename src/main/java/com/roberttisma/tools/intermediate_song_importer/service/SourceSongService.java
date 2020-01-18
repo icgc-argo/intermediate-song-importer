@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.checkRequiredField;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
 import static java.lang.String.format;
@@ -26,7 +27,7 @@ public class SourceSongService {
   @NonNull private SongApi api;
   @NonNull private SongConfig config;
 
-  public List<FileDTO> getSourceAnalysisFiles(@NonNull Path payloadFile){
+  public List<FileDTO> getSourceAnalysisFiles(@NonNull Path payloadFile) {
     val sourceData = processSourceData(payloadFile);
     return getSourceAnalysisFiles(sourceData);
   }
@@ -42,13 +43,15 @@ public class SourceSongService {
   }
 
   @SneakyThrows
-  private String getStudyForAnalysisId(@NonNull String analysisId) {
+  public String getStudyForAnalysisId(@NonNull String analysisId) {
     val response = get(getLegacyEntityUrl(analysisId));
     val j = mapper().readTree(response.getBody());
     val contentNode = parseContent(j);
-    checkImporter(!contentNode.isEmpty(),
+    checkImporter(
+        !contentNode.isEmpty(),
         "The analysisId '%s' does not exist at '%s'",
-        analysisId, config.getServerUrl());
+        analysisId,
+        config.getServerUrl());
     return contentNode.path(0).path("projectCode").asText();
   }
 
@@ -56,7 +59,7 @@ public class SourceSongService {
     return format("%s/entities?gnosId=%s", config.getServerUrl(), analysisId);
   }
 
-  private static String parseAnalysisId(Path file) {
+  public static String parseAnalysisId(Path file) {
     checkFileNameFormat(file);
     return file.getFileName().toString().replaceAll("\\.json$", "");
   }
@@ -68,13 +71,8 @@ public class SourceSongService {
         targetPayloadFile.toString());
   }
 
-  private static JsonNode parseContent(JsonNode root){
+  private static JsonNode parseContent(JsonNode root) {
     checkRequiredField(root, "content");
     return root.path("content");
   }
-
-  private static void checkRequiredField(JsonNode j, String field){
-    checkImporter(j.has(field), "Could not find field '%s' in %", field, j.toString());
-  }
-
 }

@@ -1,8 +1,13 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkFileExists;
+
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Path;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -27,7 +32,17 @@ public class JsonUtils {
   }
 
   @SneakyThrows
+  public static JsonNode readTree(@NonNull Path file) {
+    checkFileExists(file);
+    return OBJECT_MAPPER.readTree(file.toFile());
+  }
+
+  @SneakyThrows
   public static String toPrettyJson(@NonNull Object o) {
     return mapper().writerWithDefaultPrettyPrinter().writeValueAsString(o);
+  }
+
+  public static void checkRequiredField(JsonNode j, String field) {
+    checkImporter(j.has(field), "Could not find field '%s' in %", field, j.toString());
   }
 }

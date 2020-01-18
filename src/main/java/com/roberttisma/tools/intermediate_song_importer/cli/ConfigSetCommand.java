@@ -1,20 +1,19 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkFileExists;
+import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
+import static java.util.Objects.isNull;
+
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import com.roberttisma.tools.intermediate_song_importer.util.JsonUtils;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.concurrent.Callable;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkFileExists;
-import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
-import static java.util.Objects.isNull;
 
 @Getter
 @RequiredArgsConstructor
@@ -40,7 +39,7 @@ public class ConfigSetCommand implements Callable<Integer> {
   @Override
   public Integer call() throws Exception {
     ProfileConfig profileConfig = null;
-    if (isNull(inputFile)){
+    if (isNull(inputFile)) {
       profileConfig = ProfileConfig.builder().name(profileName).build();
     } else {
       profileConfig = readProfileConfigFile();
@@ -55,5 +54,4 @@ public class ConfigSetCommand implements Callable<Integer> {
     checkFileExists(inputFile);
     return JsonUtils.mapper().readValue(inputFile.toFile(), ProfileConfig.class);
   }
-
 }

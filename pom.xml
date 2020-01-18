@@ -26,6 +26,16 @@
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>${failsafe.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>bio.overture</groupId>
@@ -230,6 +240,8 @@
 
         <!-- Libs-->
         <postgresql.version>42.2.2</postgresql.version>
+        <hikari.version>3.4.2</hikari.version>
+        <failsafe.version>2.3.1</failsafe.version>
         <song.version>4.0.0-</song.version>
         <picocli.version>4.0.4</picocli.version>
         <mockito.version>2.23.0</mockito.version>

@@ -1,5 +1,6 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import com.roberttisma.tools.intermediate_song_importer.service.ProcessService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -9,9 +10,7 @@ import picocli.CommandLine.Option;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
-import static com.roberttisma.tools.intermediate_song_importer.Factory.createMigrationService;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkDirectoryExists;
-import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.streamFilesInDir;
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
 import static java.lang.String.format;
 
@@ -35,15 +34,25 @@ public class RunCommand implements Callable<Integer> {
       required = true)
   private Path inputDir;
 
+  @Option(
+      names = {"-t", "--threads"},
+      description = "Number of threads to use. Default: ${DEFAULT-VALUE}",
+      defaultValue = "1",
+      required = false)
+  private int numThreads;
+
   @Override
   public Integer call() throws Exception {
     checkDirectoryExists(inputDir);
     val result = findProfile(profileName);
     if (result.isPresent()) {
       val profileConfig = result.get();
-      try (val service = createMigrationService(profileConfig)) {
-        streamFilesInDir(inputDir, true).forEach(service::migrate);
-      }
+      ProcessService.builder()
+          .profileConfig(profileConfig)
+          .inputDir(inputDir)
+          .numThreads(numThreads)
+          .build()
+          .run();
     } else {
       val errorMessage = format("The profile '%s does not exist'", profileName);
       log.error(errorMessage);

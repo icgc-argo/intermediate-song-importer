@@ -1,23 +1,22 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.roberttisma.tools.intermediate_song_importer.model.Config;
-import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static java.lang.String.format;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roberttisma.tools.intermediate_song_importer.model.Config;
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 @Slf4j
 public class ProfileManager {
