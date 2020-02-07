@@ -4,6 +4,11 @@ This is a temporary script that should only be run by system administrators for 
 Warning: this script does not preserve the ID space of intermediate SONG. It is sole purpose is to 
 import data into intermediate SONG and publish it without having to copy/move object data around.
 
+## Requirements
+- java 11
+- maven 3.6.0+
+- GNU Make
+- bash
 
 ## Building
 ```bash
@@ -11,6 +16,7 @@ make build
 ```
 
 ## Testing with Docker
+Note: `docker` and `docker-compose` must be installed
 ```bash
 make test
 ```
