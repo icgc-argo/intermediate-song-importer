@@ -1,13 +1,13 @@
 package com.roberttisma.tools.intermediate_song_importer.model;
 
+import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeField;
+import static java.lang.String.format;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-
-import static com.roberttisma.tools.intermediate_song_importer.util.Fields.mergeField;
-import static java.lang.String.format;
 
 @Data
 @Builder
@@ -22,8 +22,7 @@ public class DBConfig implements Mergable<DBConfig> {
 
   public String createUrl() {
     return format(
-        "jdbc:postgresql://%s:%s/%s?stringtype=unspecified",
-        getHostname(), getPort(), getDbname());
+        "jdbc:postgresql://%s:%s/%s?stringtype=unspecified", getHostname(), getPort(), getDbname());
   }
 
   @Override

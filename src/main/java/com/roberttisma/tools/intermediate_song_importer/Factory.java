@@ -1,5 +1,9 @@
 package com.roberttisma.tools.intermediate_song_importer;
 
+import static bio.overture.song.sdk.Toolbox.createToolbox;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.time.temporal.ChronoUnit.SECONDS;
+
 import bio.overture.song.sdk.SongApi;
 import bio.overture.song.sdk.config.impl.DefaultRestClientConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.DBConfig;
@@ -16,10 +20,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.jodah.failsafe.RetryPolicy;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static bio.overture.song.sdk.Toolbox.createToolbox;
 
 @Slf4j
 public class Factory {

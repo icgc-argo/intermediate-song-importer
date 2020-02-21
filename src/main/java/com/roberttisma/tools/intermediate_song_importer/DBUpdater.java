@@ -1,18 +1,17 @@
 package com.roberttisma.tools.intermediate_song_importer;
 
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createRetry;
+import static net.jodah.failsafe.Failsafe.with;
+
 import com.zaxxer.hikari.HikariDataSource;
+import java.io.Closeable;
+import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
-
-import java.io.Closeable;
-import java.io.IOException;
-
-import static com.roberttisma.tools.intermediate_song_importer.Factory.createRetry;
-import static net.jodah.failsafe.Failsafe.with;
 
 @Slf4j
 @RequiredArgsConstructor

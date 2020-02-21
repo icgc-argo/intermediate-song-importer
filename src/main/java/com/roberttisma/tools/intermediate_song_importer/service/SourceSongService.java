@@ -1,24 +1,23 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import bio.overture.song.core.model.FileDTO;
-import bio.overture.song.sdk.SongApi;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
-import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.List;
-
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.checkRequiredField;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
 import static java.lang.String.format;
+
+import bio.overture.song.core.model.FileDTO;
+import bio.overture.song.sdk.SongApi;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
+import java.nio.file.Path;
+import java.util.List;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 
 @Builder
 @RequiredArgsConstructor
