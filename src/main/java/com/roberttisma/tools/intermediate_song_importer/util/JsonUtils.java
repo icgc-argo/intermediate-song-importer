@@ -45,4 +45,10 @@ public class JsonUtils {
   public static void checkRequiredField(JsonNode j, String field) {
     checkImporter(j.has(field), "Could not find field '%s' in %", field, j.toString());
   }
+
+  @SneakyThrows
+  public static <T> T readValue(Path file, Class<T> klass){
+    checkFileExists(file);
+    return OBJECT_MAPPER.readValue(file.toFile(), klass);
+  }
 }

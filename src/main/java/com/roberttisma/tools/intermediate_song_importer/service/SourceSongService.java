@@ -5,14 +5,18 @@ import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.ch
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.roberttisma.tools.intermediate_song_importer.model.ImporterSpec;
 import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
+
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,19 +30,25 @@ public class SourceSongService {
   @NonNull private SongApi api;
   @NonNull private SongConfig config;
 
-  public List<FileDTO> getSourceAnalysisFiles(@NonNull Path payloadFile) {
-    val sourceData = processSourceData(payloadFile);
-    return getSourceAnalysisFiles(sourceData);
+  public List<FileDTO> getSourceAnalysisFiles(@NonNull ImporterSpec importerSpec) {
+    return processSourceDatas(importerSpec)
+        .stream()
+        .map(this::getSourceAnalysisFiles)
+        .flatMap(Collection::stream)
+        .collect(toUnmodifiableList());
   }
 
   private List<FileDTO> getSourceAnalysisFiles(SourceData d) {
     return api.getAnalysisFiles(d.getStudyId(), d.getAnalysisId());
   }
 
-  private SourceData processSourceData(Path file) {
-    val analysisId = parseAnalysisId(file);
-    val studyId = getStudyForAnalysisId(analysisId);
-    return SourceData.builder().analysisId(analysisId).studyId(studyId).build();
+  private List<SourceData> processSourceDatas(ImporterSpec importerSpec) {
+    return importerSpec.getAnalysisIds().stream()
+        .map(a -> {
+          val studyId = getStudyForAnalysisId(a);
+          return SourceData.builder().analysisId(a).studyId(studyId).build();
+        })
+        .collect(toUnmodifiableList());
   }
 
   @SneakyThrows

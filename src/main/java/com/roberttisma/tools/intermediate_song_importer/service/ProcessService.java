@@ -6,6 +6,7 @@ import static com.roberttisma.tools.intermediate_song_importer.Factory.createMig
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.listFilesInDir;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+import com.roberttisma.tools.intermediate_song_importer.model.ImporterSpec;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import java.nio.file.Path;
 import java.util.List;
@@ -33,12 +34,13 @@ public class ProcessService implements Runnable {
       val service =
           createMigrationService(
               profileConfig.getSourceSong(), profileConfig.getTargetSong(), dbUpdater);
+      val importerSpecs = service.readImporterSpecs(files);
 
       // Initialize all the studyIds on the target song
-      service.initTargetStudyIds(files);
+      service.initTargetStudyIds(importerSpecs);
 
       // Concurrently run migrations
-      partition(files, numThreads)
+      partition(importerSpecs, numThreads)
           .forEach(p -> executorService.submit(createMigrationJob(service, p)));
 
       executorService.shutdown();
@@ -46,7 +48,7 @@ public class ProcessService implements Runnable {
     }
   }
 
-  private static Runnable createMigrationJob(MigrationService service, List<Path> jsonFiles) {
-    return () -> jsonFiles.forEach(service::migrate);
+  private static Runnable createMigrationJob(MigrationService service, List<ImporterSpec> importerSpecs) {
+    return () -> importerSpecs.forEach(service::migrate);
   }
 }

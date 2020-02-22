@@ -1,19 +1,31 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
 import static bio.overture.song.core.utils.Separators.COMMA;
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.buildImporterException;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToSet;
 import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToStream;
+import static com.roberttisma.tools.intermediate_song_importer.util.Joiners.COMMA_SPACE;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.readValue;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
+import com.google.common.collect.Lists;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
+import com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException;
+import com.roberttisma.tools.intermediate_song_importer.model.ImporterSpec;
+import com.roberttisma.tools.intermediate_song_importer.util.Joiners;
+import com.roberttisma.tools.intermediate_song_importer.util.JsonUtils;
 import com.roberttisma.tools.intermediate_song_importer.util.Payloads;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +42,44 @@ public class MigrationService {
   @NonNull private final TargetSongService targetSongService;
   @NonNull private final DBUpdater dbUpdater;
 
-  public void initTargetStudyIds(@NonNull Collection<Path> jsonFiles) {
-    jsonFiles.stream()
-        .map(Payloads::parseStudyId)
+  public static ImporterSpec readImporterSpec(@NonNull Path file){
+    val spec = readValue(file, ImporterSpec.class);
+    spec.setFile(file);
+    return spec;
+  }
+
+  public List<ImporterSpec> readImporterSpecs(@NonNull Collection<Path> files) {
+    val missingStudyFiles = Lists.<Path>newArrayList();
+    val importerSpecs = files.stream()
+        .map(f -> {
+          val importerSpec = readImporterSpec(f);
+          if (importerSpec.getStudyId().isEmpty()){
+            missingStudyFiles.add(f);
+          }
+          return importerSpec;
+        })
+        .collect(toUnmodifiableList());
+    checkImporter(missingStudyFiles.isEmpty(),
+        "The following files are missing the studyId in the payload: %s", COMMA_SPACE.join(missingStudyFiles) );
+    return importerSpecs;
+  }
+
+  public void initTargetStudyIds(@NonNull Collection<ImporterSpec> importerSpecs) {
+    importerSpecs.stream()
+        .map(ImporterSpec::getStudyId)
+        .map(Optional::get)
         .collect(toSet())
         .forEach(targetSongService::saveStudy);
   }
 
   @SneakyThrows
-  public void migrate(@NonNull Path jsonFile) {
+  public void migrate(@NonNull ImporterSpec importerSpec) {
     try {
       // Get source files
-      val sourceAnalysisFiles = sourceSongService.getSourceAnalysisFiles(jsonFile);
+      val sourceAnalysisFiles = sourceSongService.getSourceAnalysisFiles(importerSpec);
 
       // Get target analysis
-      val targetAnalysis = targetSongService.submitTargetPayload(jsonFile);
+      val targetAnalysis = targetSongService.submitTargetPayload(importerSpec);
 
       // Update object ids via backdoor db
       updateAnalysisFiles(sourceAnalysisFiles, targetAnalysis.getFiles());
@@ -52,11 +87,11 @@ public class MigrationService {
       // Publish the target analysis
       targetSongService.publishTargetAnalysis(targetAnalysis);
 
-      report(jsonFile, sourceAnalysisFiles, targetAnalysis);
+      report(importerSpec.getFile(), sourceAnalysisFiles, targetAnalysis);
     } catch (Throwable t) {
       log.error(
           "[PROCESSING_ERROR] filename='{}' errorType='{}':  '{}",
-          jsonFile.toString(),
+          importerSpec.getFile().toString(),
           t.getClass().getSimpleName(),
           t.getMessage());
     }

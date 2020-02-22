@@ -4,6 +4,7 @@ import static com.roberttisma.tools.intermediate_song_importer.Factory.createRet
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.buildImporterException;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
+import static com.roberttisma.tools.intermediate_song_importer.util.Joiners.COMMA_SPACE;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
 import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.post;
@@ -13,13 +14,18 @@ import static net.jodah.failsafe.Failsafe.with;
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
+import com.roberttisma.tools.intermediate_song_importer.model.ImporterSpec;
 import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.Study;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+
+import com.roberttisma.tools.intermediate_song_importer.util.Joiners;
+import com.roberttisma.tools.intermediate_song_importer.util.JsonUtils;
 import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,12 +49,15 @@ public class TargetSongService {
     return api.getAnalysisFiles(studyId, analysisId);
   }
 
-  public Analysis submitTargetPayload(@NonNull Path payloadFile) throws IOException {
-    val targetPayload = readFileContent(payloadFile);
-    val targetStudyId = extractStudyId(targetPayload);
+  public Analysis submitTargetPayload(@NonNull ImporterSpec importerSpec) throws IOException {
+    val targetStudyId = importerSpec.getStudyId()
+        .orElseThrow(() ->
+            buildImporterException("The target studyId was not defined for source analysisIds: [%s]",
+            COMMA_SPACE.join(importerSpec.getAnalysisIds())));
     checkImporter(
         isStudyExist(targetStudyId), "The target studyId '%s' does not exist", targetStudyId);
 
+    val targetPayload = importerSpec.getPayload().asText();
     val targetAnalysisId =
         with(createRetry(String.class))
             .get(() -> api.submit(targetStudyId, targetPayload).getAnalysisId());
