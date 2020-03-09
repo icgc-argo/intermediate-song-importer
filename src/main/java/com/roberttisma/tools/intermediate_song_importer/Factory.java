@@ -40,21 +40,21 @@ public class Factory {
   }
 
   public static MigrationService createMigrationService(
-      @NonNull SourceSongConfig sc, @NonNull TargetSongConfig tc, @NonNull DBUpdater dbUpdater) {
+      @NonNull SourceSongConfig sc, @NonNull TargetSongConfig tc, @NonNull Repository repository) {
     return MigrationService.builder()
-        .dbUpdater(dbUpdater)
+        .repository(repository)
         .targetSongService(createTargetSongService(tc))
         .sourceSongService(createSourceSongService(sc))
         .build();
   }
 
   @SneakyThrows
-  public static DBUpdater createDBUpdater(@NonNull DBConfig dbConfig) {
+  public static Repository createRepository(@NonNull DBConfig dbConfig) {
     val c = new HikariConfig();
     c.setJdbcUrl(dbConfig.createUrl());
     c.setUsername(dbConfig.getUsername());
     c.setPassword(dbConfig.getPassword());
-    return new DBUpdater(new HikariDataSource(c));
+    return new Repository(new HikariDataSource(c));
   }
 
   private static SongApi createSongApi(@NonNull SongConfig c) {

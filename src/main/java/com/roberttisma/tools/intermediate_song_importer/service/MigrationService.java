@@ -9,7 +9,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
-import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
+import com.roberttisma.tools.intermediate_song_importer.Repository;
 import com.roberttisma.tools.intermediate_song_importer.model.report.ErrorReport;
 import com.roberttisma.tools.intermediate_song_importer.model.report.Report;
 import com.roberttisma.tools.intermediate_song_importer.model.report.SuccessReport;
@@ -31,7 +31,7 @@ public class MigrationService {
 
   @NonNull private final SourceSongService sourceSongService;
   @NonNull private final TargetSongService targetSongService;
-  @NonNull private final DBUpdater dbUpdater;
+  @NonNull private final Repository repository;
 
   public void initTargetStudyIds(@NonNull Collection<Path> jsonFiles) {
     jsonFiles.stream()
@@ -112,7 +112,7 @@ public class MigrationService {
                       t.getFileName(),
                       t.getAnalysisId());
                   val sourceObjectId = sourceMap.get(t.getFileName());
-                  return dbUpdater.update(sourceObjectId, t.getObjectId());
+                  return repository.update(sourceObjectId, t.getObjectId());
                 })
             .sum();
 

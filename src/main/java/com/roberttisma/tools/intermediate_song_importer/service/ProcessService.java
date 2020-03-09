@@ -1,7 +1,7 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
 import static com.google.common.collect.Lists.partition;
-import static com.roberttisma.tools.intermediate_song_importer.Factory.createDBUpdater;
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createRepository;
 import static com.roberttisma.tools.intermediate_song_importer.Factory.createMigrationService;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.model.report.FinalReport.createFinalReport;
@@ -39,7 +39,7 @@ public class ProcessService implements Runnable {
   public void run() {
     val executorService = newFixedThreadPool(numThreads);
     val files = listFilesInDir(inputDir, true);
-    try (val dbUpdater = createDBUpdater(profileConfig.getTargetSong().getDb())) {
+    try (val dbUpdater = createRepository(profileConfig.getTargetSong().getDb())) {
       val service =
           createMigrationService(
               profileConfig.getSourceSong(), profileConfig.getTargetSong(), dbUpdater);
