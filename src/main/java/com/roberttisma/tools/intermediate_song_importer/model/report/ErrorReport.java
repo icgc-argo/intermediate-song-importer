@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorReport implements Report{
+public class ErrorReport implements Report {
 
   private String payloadFilename;
   private String errorType;

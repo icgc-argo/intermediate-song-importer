@@ -12,11 +12,8 @@ import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -67,8 +64,9 @@ public class FileIO {
     return new String(toByteArray(filePath.toFile()));
   }
 
-  public static void writeStringToFile(@NonNull String content, @NonNull Path filePath) throws IOException {
-    if (!isNull(filePath.getParent())){
+  public static void writeStringToFile(@NonNull String content, @NonNull Path filePath)
+      throws IOException {
+    if (!isNull(filePath.getParent())) {
       setupDirectory(filePath.getParent());
     }
     writeString(filePath, content, UTF_8);

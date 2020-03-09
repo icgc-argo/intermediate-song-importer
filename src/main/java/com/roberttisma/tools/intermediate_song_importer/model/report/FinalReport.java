@@ -1,27 +1,21 @@
 package com.roberttisma.tools.intermediate_song_importer.model.report;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
+import static com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
 
 @Getter
 public class FinalReport implements Report {
 
-  private final Set<Report> success  = newHashSet();
+  private final Set<Report> success = newHashSet();
   private final Set<Report> errors = newHashSet();
 
-  public void addReport(@NonNull Report r){
-    if (r.hasErrors()){
+  public void addReport(@NonNull Report r) {
+    if (r.hasErrors()) {
       errors.add(r);
     } else {
       success.add(r);
@@ -33,10 +27,9 @@ public class FinalReport implements Report {
     return !errors.isEmpty();
   }
 
-  public static FinalReport createFinalReport(@NonNull Collection<Report> reports){
+  public static FinalReport createFinalReport(@NonNull Collection<Report> reports) {
     val fr = new FinalReport();
     reports.forEach(fr::addReport);
     return fr;
   }
-
 }

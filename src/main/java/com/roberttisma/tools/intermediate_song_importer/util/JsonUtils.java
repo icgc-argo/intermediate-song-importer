@@ -47,7 +47,7 @@ public class JsonUtils {
   }
 
   @SneakyThrows
-  public static <T> T readValue(Path file, Class<T> klass){
+  public static <T> T readValue(Path file, Class<T> klass) {
     checkFileExists(file);
     return OBJECT_MAPPER.readValue(file.toFile(), klass);
   }

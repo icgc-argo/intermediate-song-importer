@@ -17,7 +17,6 @@ import com.roberttisma.tools.intermediate_song_importer.util.Payloads;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -71,9 +70,10 @@ public class MigrationService {
     }
   }
 
-  private SuccessReport buildSuccessReport(Path jsonFile, List<FileDTO> sourceAnalysisFiles, Analysis targetAnalysis) {
-    val sourceAnalysisIds = mapToStream(sourceAnalysisFiles, FileDTO::getAnalysisId)
-        .collect(toUnmodifiableSet());
+  private SuccessReport buildSuccessReport(
+      Path jsonFile, List<FileDTO> sourceAnalysisFiles, Analysis targetAnalysis) {
+    val sourceAnalysisIds =
+        mapToStream(sourceAnalysisFiles, FileDTO::getAnalysisId).collect(toUnmodifiableSet());
     val sourceStudyId = mapToStream(sourceAnalysisFiles, FileDTO::getStudyId).findFirst().get();
     val sourceObjectIds = mapToSet(sourceAnalysisFiles, FileDTO::getObjectId);
     val targetObjectIds =
@@ -85,16 +85,17 @@ public class MigrationService {
     val targetAnalysisState =
         targetSongService.getTargetAnalysisState(targetAnalysis.getStudyId(), targetAnalysisId);
     val allObjectsMigrated = sourceObjectIds.containsAll(targetObjectIds);
-    val reportData = SuccessReport.builder()
-        .payloadFilename(jsonFile.toString())
-        .legacyStudyId(sourceStudyId)
-        .legacyAnalysisIds(sourceAnalysisIds)
-        .targetAnalysisId(targetAnalysisId)
-        .targetAnalysisState(targetAnalysisState)
-        .targetStudyId(targetAnalysis.getStudyId())
-        .isAllObjectIdsMigrated(allObjectsMigrated)
-        .objectIdsMigrated(targetObjectIds)
-        .build();
+    val reportData =
+        SuccessReport.builder()
+            .payloadFilename(jsonFile.toString())
+            .legacyStudyId(sourceStudyId)
+            .legacyAnalysisIds(sourceAnalysisIds)
+            .targetAnalysisId(targetAnalysisId)
+            .targetAnalysisState(targetAnalysisState)
+            .targetStudyId(targetAnalysis.getStudyId())
+            .isAllObjectIdsMigrated(allObjectsMigrated)
+            .objectIdsMigrated(targetObjectIds)
+            .build();
     log.info("[PROCESSING_SUCCESS]  {}", reportData);
     return reportData;
   }
