@@ -2,15 +2,21 @@ package com.roberttisma.tools.intermediate_song_importer.util;
 
 import static com.google.common.io.Files.toByteArray;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
 import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.walk;
+import static java.nio.file.Files.writeString;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -59,6 +65,13 @@ public class FileIO {
 
   public static String readFileContent(@NonNull Path filePath) throws IOException {
     return new String(toByteArray(filePath.toFile()));
+  }
+
+  public static void writeStringToFile(@NonNull String content, @NonNull Path filePath) throws IOException {
+    if (!isNull(filePath.getParent())){
+      setupDirectory(filePath.getParent());
+    }
+    writeString(filePath, content, UTF_8);
   }
 
   public static Stream<Path> streamFilesInDir(@NonNull Path dirPath, boolean recursive)

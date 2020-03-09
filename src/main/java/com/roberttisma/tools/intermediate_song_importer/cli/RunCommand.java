@@ -34,6 +34,12 @@ public class RunCommand implements Callable<Integer> {
   private Path inputDir;
 
   @Option(
+      names = {"-o", "--output-report-file"},
+      description = "Path to output report file to",
+      required = true)
+  private Path outputReportFile;
+
+  @Option(
       names = {"-t", "--threads"},
       description = "Number of threads to use. Default: ${DEFAULT-VALUE}",
       defaultValue = "1",
@@ -49,6 +55,7 @@ public class RunCommand implements Callable<Integer> {
       ProcessService.builder()
           .profileConfig(profileConfig)
           .inputDir(inputDir)
+          .outputReportFile(outputReportFile)
           .numThreads(numThreads)
           .build()
           .run();

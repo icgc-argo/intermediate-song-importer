@@ -1,19 +1,23 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import static bio.overture.song.core.utils.Separators.COMMA;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToSet;
 import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToStream;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import com.roberttisma.tools.intermediate_song_importer.DBUpdater;
+import com.roberttisma.tools.intermediate_song_importer.model.report.ErrorReport;
+import com.roberttisma.tools.intermediate_song_importer.model.report.Report;
+import com.roberttisma.tools.intermediate_song_importer.model.report.SuccessReport;
 import com.roberttisma.tools.intermediate_song_importer.util.Payloads;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +42,7 @@ public class MigrationService {
   }
 
   @SneakyThrows
-  public void migrate(@NonNull Path jsonFile) {
+  public Report migrate(@NonNull Path jsonFile) {
     try {
       // Get source files
       val sourceAnalysisFiles = sourceSongService.getSourceAnalysisFiles(jsonFile);
@@ -52,19 +56,24 @@ public class MigrationService {
       // Publish the target analysis
       targetSongService.publishTargetAnalysis(targetAnalysis);
 
-      report(jsonFile, sourceAnalysisFiles, targetAnalysis);
+      return buildSuccessReport(jsonFile, sourceAnalysisFiles, targetAnalysis);
     } catch (Throwable t) {
       log.error(
           "[PROCESSING_ERROR] filename='{}' errorType='{}':  '{}",
           jsonFile.toString(),
           t.getClass().getSimpleName(),
           t.getMessage());
+      return ErrorReport.builder()
+          .payloadFilename(jsonFile.toString())
+          .errorType(t.getClass().getName())
+          .message(t.getMessage())
+          .build();
     }
   }
 
-  private void report(Path jsonFile, List<FileDTO> sourceAnalysisFiles, Analysis targetAnalysis) {
-    val sourceAnalysisId =
-        mapToStream(sourceAnalysisFiles, FileDTO::getAnalysisId).findFirst().get();
+  private SuccessReport buildSuccessReport(Path jsonFile, List<FileDTO> sourceAnalysisFiles, Analysis targetAnalysis) {
+    val sourceAnalysisIds = mapToStream(sourceAnalysisFiles, FileDTO::getAnalysisId)
+        .collect(toUnmodifiableSet());
     val sourceStudyId = mapToStream(sourceAnalysisFiles, FileDTO::getStudyId).findFirst().get();
     val sourceObjectIds = mapToSet(sourceAnalysisFiles, FileDTO::getObjectId);
     val targetObjectIds =
@@ -76,16 +85,18 @@ public class MigrationService {
     val targetAnalysisState =
         targetSongService.getTargetAnalysisState(targetAnalysis.getStudyId(), targetAnalysisId);
     val allObjectsMigrated = sourceObjectIds.containsAll(targetObjectIds);
-    log.info(
-        "[PROCESSING_SUCCESS] fn={}\tsourceAnId={}\tsourceStudyId={}\ttargetAnId={}\ttargetStudyId={}\ttargetAnState={}\tallObjectIdsMigrated={}\tobjectIdsMigrated=[{}]",
-        jsonFile.toString(),
-        sourceAnalysisId,
-        sourceStudyId,
-        targetAnalysisId,
-        targetAnalysis.getStudyId(),
-        targetAnalysisState,
-        allObjectsMigrated,
-        COMMA.join(targetObjectIds));
+    val reportData = SuccessReport.builder()
+        .payloadFilename(jsonFile.toString())
+        .legacyStudyId(sourceStudyId)
+        .legacyAnalysisIds(sourceAnalysisIds)
+        .targetAnalysisId(targetAnalysisId)
+        .targetAnalysisState(targetAnalysisState)
+        .targetStudyId(targetAnalysis.getStudyId())
+        .isAllObjectIdsMigrated(allObjectsMigrated)
+        .objectIdsMigrated(targetObjectIds)
+        .build();
+    log.info("[PROCESSING_SUCCESS]  {}", reportData);
+    return reportData;
   }
 
   private void updateAnalysisFiles(List<FileDTO> sourceFiles, List<FileDTO> targetFiles) {
