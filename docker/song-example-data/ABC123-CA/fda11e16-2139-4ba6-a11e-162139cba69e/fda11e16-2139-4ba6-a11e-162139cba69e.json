@@ -31,7 +31,10 @@
       "fileSize": 52,
       "fileMd5sum": "9a793e90d0d1e11301ea8da996446e59",
       "fileAccess": "open",
-      "fileType": "VCF"
+      "fileType": "VCF",
+	  "info" : {
+		  "legacyAnalysisId": "fda11e16-2139-4ba6-a11e-162139cba69e"
+	  }
     },
     {
       "fileName": "example4.vcf.gz.idx",
@@ -39,7 +42,10 @@
       "fileSize": 25,
       "fileMd5sum": "c03274816eb4907a92b8e5632cd6eb81",
       "fileAccess": "open",
-      "fileType": "IDX"
+      "fileType": "IDX",
+	  "info" : {
+		  "legacyAnalysisId": "fda11e16-2139-4ba6-a11e-162139cba69e"
+	  }
     }
   ],
   "info": {

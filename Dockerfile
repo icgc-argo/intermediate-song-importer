@@ -1,15 +1,14 @@
-FROM openjdk:11-jdk as builder
+FROM adoptopenjdk/openjdk11:jdk-11.0.6_10-alpine as builder
 
 COPY . /srv
 WORKDIR /srv
 RUN ./mvnw clean package -DskipTests
 
 ###############################################################################################################
-FROM openjdk:11-jre-stretch
+FROM adoptopenjdk/openjdk11:jre-11.0.6_10-alpine
 
 ENV SRV_HOME      /srv
 ENV SRV_DIST_DIR  /srv-dist
-ENV PATH /usr/local/openjdk-11/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$SRV_HOME/bin
 
 COPY --from=builder /srv/target/intermediate-song-importer-*-dist.tar.gz /importer.tar.gz
 
@@ -18,7 +17,8 @@ RUN mkdir /srv/temp \
 	&& rm -rf /importer.tar.gz \
 	&& mv /srv/temp/intermediate-song-importer* /srv/temp/something \
 	&& mv /srv/temp/something/* /srv \
-	&& rm -rf /srv/temp
+	&& rm -rf /srv/temp \
+	&& apk add bash
 
 # Set working directory for convenience with interactive usage
 WORKDIR $SRV_HOME
