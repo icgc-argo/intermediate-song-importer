@@ -20,14 +20,21 @@ public class Repository implements Closeable {
 
   @NonNull private final HikariDataSource hds;
 
-  public int update(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
+  public int updateFileId(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
     return execute(
         Integer.class,
-        h ->
-            h.createUpdate("UPDATE file SET id=:sid WHERE id=:tid")
+        h -> h.createUpdate("UPDATE file SET id=:sid WHERE id=:tid")
                 .bind("sid", sourceObjectId)
                 .bind("tid", targetObjectId)
                 .execute());
+  }
+  public int updateFileInfoId(@NonNull String sourceObjectId, @NonNull String targetObjectId) {
+    return execute(
+        Integer.class,
+        h -> h.createUpdate("UPDATE info SET id=:sid WHERE id=:tid")
+            .bind("sid", sourceObjectId)
+            .bind("tid", targetObjectId)
+            .execute());
   }
 
   // TODO: need to do json search for legacyAnalysisId in the file Info type

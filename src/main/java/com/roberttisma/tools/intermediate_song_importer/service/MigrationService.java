@@ -112,7 +112,8 @@ public class MigrationService {
                       t.getFileName(),
                       t.getAnalysisId());
                   val sourceObjectId = sourceMap.get(t.getFileName());
-                  return repository.update(sourceObjectId, t.getObjectId());
+                  repository.updateFileInfoId(sourceObjectId, t.getObjectId());
+                  return repository.updateFileId(sourceObjectId, t.getObjectId());
                 })
             .sum();
 

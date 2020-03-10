@@ -1,8 +1,8 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
 import static com.google.common.collect.Lists.partition;
-import static com.roberttisma.tools.intermediate_song_importer.Factory.createRepository;
 import static com.roberttisma.tools.intermediate_song_importer.Factory.createMigrationService;
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createRepository;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.model.report.FinalReport.createFinalReport;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.listFilesInDir;
