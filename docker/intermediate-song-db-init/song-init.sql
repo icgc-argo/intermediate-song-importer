@@ -708,7 +708,6 @@ COPY public.flyway_schema_history (installed_rank, version, description, type, s
 
 COPY public.info (id, id_type, info) FROM stdin;
 TEST-CA	Study	{}
-PACA-CA	Study	{}
 ABC123-CA	Study	{}
 \.
 
