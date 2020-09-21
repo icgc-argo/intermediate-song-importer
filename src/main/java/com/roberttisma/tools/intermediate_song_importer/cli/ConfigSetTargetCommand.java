@@ -3,6 +3,7 @@ package com.roberttisma.tools.intermediate_song_importer.cli;
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.saveProfile;
 
 import com.roberttisma.tools.intermediate_song_importer.model.DBConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.IdConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.TargetSongConfig;
 import java.util.concurrent.Callable;
@@ -74,6 +75,27 @@ public class ConfigSetTargetCommand implements Callable<Integer> {
       required = false)
   private String dbPassword;
 
+  @Option(
+      names = {"--donor-template-url"},
+      interactive = false,
+      description = "Set the donor id template url",
+      required = false)
+  private String donorTemplateUrl;
+
+  @Option(
+      names = {"--specimen-template-url"},
+      interactive = false,
+      description = "Set the specimen id template url",
+      required = false)
+  private String specimenTemplateUrl;
+
+  @Option(
+      names = {"--sample-template-url"},
+      interactive = false,
+      description = "Set the sample id template url",
+      required = false)
+  private String sampleTemplateUrl;
+
   @Override
   public Integer call() throws Exception {
     val profileConfig =
@@ -83,6 +105,12 @@ public class ConfigSetTargetCommand implements Callable<Integer> {
                 TargetSongConfig.builder()
                     .accessToken(accessToken)
                     .serverUrl(targetUrl)
+                    .id(
+                        IdConfig.builder()
+                            .donorUrlTemplate(donorTemplateUrl)
+                            .specimenUrlTemplate(specimenTemplateUrl)
+                            .sampleUrlTemplate(sampleTemplateUrl)
+                            .build())
                     .db(
                         DBConfig.builder()
                             .dbname(dbname)

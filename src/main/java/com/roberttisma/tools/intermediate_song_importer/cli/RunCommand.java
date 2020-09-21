@@ -1,9 +1,15 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createIdValidationService;
+import static com.roberttisma.tools.intermediate_song_importer.model.IdConfig.checkIdConfig;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkDirectoryExists;
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
 import static java.lang.String.format;
 
+import com.roberttisma.tools.intermediate_song_importer.Factory;
+import com.roberttisma.tools.intermediate_song_importer.model.IdConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
+import com.roberttisma.tools.intermediate_song_importer.service.IdValidationService;
 import com.roberttisma.tools.intermediate_song_importer.service.ProcessService;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -55,6 +61,7 @@ public class RunCommand implements Callable<Integer> {
       ProcessService.builder()
           .profileConfig(profileConfig)
           .inputDir(inputDir)
+          .idValidationService(buildIdValidationService(profileConfig))
           .outputReportFile(outputReportFile)
           .numThreads(numThreads)
           .build()
@@ -66,5 +73,11 @@ public class RunCommand implements Callable<Integer> {
       return 1;
     }
     return 0;
+  }
+
+  private static IdValidationService buildIdValidationService(ProfileConfig p){
+    val idConfig = p.getTargetSong().getId();
+    checkIdConfig(idConfig);
+    return createIdValidationService(idConfig);
   }
 }

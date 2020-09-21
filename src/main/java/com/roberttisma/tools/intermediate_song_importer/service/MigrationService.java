@@ -1,28 +1,29 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
-import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToSet;
-import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToStream;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import com.roberttisma.tools.intermediate_song_importer.Repository;
-import com.roberttisma.tools.intermediate_song_importer.model.report.ErrorReport;
+import com.roberttisma.tools.intermediate_song_importer.model.report.MigrationErrorReport;
 import com.roberttisma.tools.intermediate_song_importer.model.report.Report;
 import com.roberttisma.tools.intermediate_song_importer.model.report.SuccessReport;
 import com.roberttisma.tools.intermediate_song_importer.util.Payloads;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToSet;
+import static com.roberttisma.tools.intermediate_song_importer.util.CollectionUtils.mapToStream;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 @Slf4j
 @Builder
@@ -62,7 +63,7 @@ public class MigrationService {
           jsonFile.toString(),
           t.getClass().getSimpleName(),
           t.getMessage());
-      return ErrorReport.builder()
+      return MigrationErrorReport.builder()
           .payloadFilename(jsonFile.toString())
           .errorType(t.getClass().getName())
           .message(t.getMessage())

@@ -1,24 +1,11 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import static com.roberttisma.tools.intermediate_song_importer.Factory.createRetry;
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.buildImporterException;
-import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
-import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
-import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
-import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.get;
-import static com.roberttisma.tools.intermediate_song_importer.util.RestClient.post;
-import static java.lang.String.format;
-import static net.jodah.failsafe.Failsafe.with;
-
 import bio.overture.song.core.model.Analysis;
 import bio.overture.song.core.model.FileDTO;
 import bio.overture.song.sdk.SongApi;
 import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.Study;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
+import com.roberttisma.tools.intermediate_song_importer.util.RestClient;
 import kong.unirest.HttpResponse;
 import lombok.Builder;
 import lombok.NonNull;
@@ -27,11 +14,25 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createRetry;
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.buildImporterException;
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
+import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
+import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
+import static java.lang.String.format;
+import static net.jodah.failsafe.Failsafe.with;
+
 @Slf4j
 @Builder
 @RequiredArgsConstructor
 public class TargetSongService {
 
+  @NonNull private RestClient restClient;
   @NonNull private SongApi api;
   @NonNull private SongConfig config;
 
@@ -69,7 +70,7 @@ public class TargetSongService {
   }
 
   private boolean isStudyExist(@NonNull String studyId) {
-    val response = get(getIsStudyExistUrl(studyId));
+    val response = restClient.get(getIsStudyExistUrl(studyId));
     return handleNotFound(
             response,
             "Error getting the studyId '%s' for host '%s': %s",
@@ -81,7 +82,7 @@ public class TargetSongService {
 
   private void createStudy(@NonNull String studyId) {
     val body = Study.builder().studyId(studyId).build();
-    val response = post(config.getAccessToken(), getCreateStudyUrl(studyId), body);
+    val response = restClient.post(config.getAccessToken(), getCreateStudyUrl(studyId), body);
     checkImporter(
         response.isSuccess(),
         "Error creating studyId '%s': %s -> %s",

@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorReport implements Report {
+public class IdDNEErrorReport implements Report {
 
-  private String payloadFilename;
   private String errorType;
-  private String message;
+  private String entityType;
+  private String studyId;
+  private String submitterId;
 
   @Override
   public boolean hasErrors() {
