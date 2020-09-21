@@ -1,11 +1,15 @@
 package com.roberttisma.tools.intermediate_song_importer.util;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static java.util.Objects.isNull;
 
+import com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException;
 import com.roberttisma.tools.intermediate_song_importer.model.Mergable;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import lombok.NonNull;
 import lombok.val;
 
 public class Fields {
@@ -26,5 +30,9 @@ public class Fields {
     if (!isNull(value)) {
       getter.apply(base).merge(value);
     }
+  }
+
+  public static void checkRequiredField(@NonNull String field, String value){
+    checkImporter(!isNullOrEmpty(value), "The field '%s' must not be null or empty");
   }
 }

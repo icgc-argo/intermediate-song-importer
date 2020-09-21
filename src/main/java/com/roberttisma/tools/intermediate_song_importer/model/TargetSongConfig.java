@@ -18,6 +18,7 @@ public class TargetSongConfig implements Mergable<TargetSongConfig>, SongConfig 
   private String accessToken;
 
   @Builder.Default private DBConfig db = new DBConfig();
+  @Builder.Default private IdConfig id = new IdConfig();
 
   @Override
   public void merge(@NonNull TargetSongConfig targetSongConfig) {
@@ -26,5 +27,6 @@ public class TargetSongConfig implements Mergable<TargetSongConfig>, SongConfig 
     mergeField(
         TargetSongConfig::getAccessToken, TargetSongConfig::setAccessToken, this, targetSongConfig);
     mergeMergableField(TargetSongConfig::getDb, this, targetSongConfig);
+    mergeMergableField(TargetSongConfig::getId, this, targetSongConfig);
   }
 }

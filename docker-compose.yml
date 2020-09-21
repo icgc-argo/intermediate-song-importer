@@ -156,7 +156,7 @@ services:
     command: ./bin/sing
 
   song-server:
-    image: overture/song-server:4.2.2
+    image: overture/song-server:4.2.4
     container_name: song-server
     environment:
       SERVER_PORT: 8080
@@ -189,7 +189,7 @@ services:
       - "./docker/scratch/song-server-logs:/song-server/logs"
 
   intermediate-song-server:
-    image: overture/song-server:4.2.2
+    image: overture/song-server:4.2.4
     container_name: intermediate-song-server
     environment:
       SERVER_PORT: 8080

@@ -43,7 +43,7 @@ public class JsonUtils {
   }
 
   public static void checkRequiredField(JsonNode j, String field) {
-    checkImporter(j.has(field), "Could not find field '%s' in %", field, j.toString());
+    checkImporter(j.has(field), "Could not find field '%s' in %s", field, j.toString());
   }
 
   @SneakyThrows
