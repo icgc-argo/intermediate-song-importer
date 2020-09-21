@@ -60,6 +60,7 @@ public class ProcessService implements Runnable {
         writeFinalReport(idFailedReports);
       } else {
         // Concurrently run migrations
+        log.info("[ID_VALIDATION_SUCCESS]: All the submitterIds from '{}' exist on the external id service connected to targetSong", inputDir.toString());
         val executorService = newFixedThreadPool(numThreads);
         val futures =
             partition(files, numThreads).stream()
