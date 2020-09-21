@@ -1,24 +1,5 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
-import bio.overture.song.core.model.FileDTO;
-import bio.overture.song.sdk.SongApi;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
-import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
-import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
-import com.roberttisma.tools.intermediate_song_importer.util.RestClient;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.checkImporter;
 import static com.roberttisma.tools.intermediate_song_importer.util.Joiners.COMMA_SPACE;
@@ -28,6 +9,24 @@ import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.re
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
+
+import bio.overture.song.core.model.FileDTO;
+import bio.overture.song.sdk.SongApi;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
+import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
+import com.roberttisma.tools.intermediate_song_importer.model.SourceData;
+import com.roberttisma.tools.intermediate_song_importer.util.RestClient;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import lombok.Builder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 
 @Builder
 @RequiredArgsConstructor

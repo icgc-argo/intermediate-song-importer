@@ -3,11 +3,9 @@ package com.roberttisma.tools.intermediate_song_importer.util;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.checkRequiredField;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.readTree;
 
-import java.nio.file.Path;
-
-import bio.overture.song.core.model.AnalysisType;
 import bio.overture.song.core.model.AnalysisTypeId;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Path;
 import lombok.NonNull;
 import lombok.val;
 
@@ -66,7 +64,4 @@ public class Payloads {
     val root = readTree(jsonPath);
     return parseAnalysisTypeId(root);
   }
-
-
-
 }

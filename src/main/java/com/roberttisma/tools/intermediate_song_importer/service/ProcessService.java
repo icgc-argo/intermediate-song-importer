@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -56,23 +55,27 @@ public class ProcessService implements Runnable {
       log.info("Initializing target studyIds");
       service.initTargetStudyIds(files);
 
-	  // Check if all the submitterIds from the batch exist on the external id service that targetSong communicates with
-      log.info("Validating that ALL submitterIds exist on external id service before beginning the migration");
+      // Check if all the submitterIds from the batch exist on the external id service that
+      // targetSong communicates with
+      log.info(
+          "Validating that ALL submitterIds exist on external id service before beginning the migration");
       val idFailedReports = extractReportData(idValidationService.validate(files));
-      if (!idFailedReports.isEmpty()){
+      if (!idFailedReports.isEmpty()) {
         log.error("[ID_VALIDATION_ERROR]: Several ids do not exist on the external id service");
         writeFinalReport(idFailedReports);
         return;
       }
-      log.info("[ID_VALIDATION_SUCCESS]: All the submitterIds from '{}' exist on the external id service connected to targetSong", inputDir.toString());
-
+      log.info(
+          "[ID_VALIDATION_SUCCESS]: All the submitterIds from '{}' exist on the external id service connected to targetSong",
+          inputDir.toString());
 
       // Check if all analysisTypes already exist and are the latest
       log.info("Validating that all analysisTypes in all payloads are the latest");
-      val analysisTypeErrorReports = analysisTypeValidationService.validateLatestAnalysisType(files);
-      if (!analysisTypeErrorReports.isEmpty()){
+      val analysisTypeErrorReports =
+          analysisTypeValidationService.validateLatestAnalysisType(files);
+      if (!analysisTypeErrorReports.isEmpty()) {
         writeFinalReport(analysisTypeErrorReports);
-        return ;
+        return;
       }
 
       // Concurrently run migrations
@@ -102,7 +105,7 @@ public class ProcessService implements Runnable {
   }
 
   @SneakyThrows
-  private void writeFinalReport(List<Report> reports){
+  private void writeFinalReport(List<Report> reports) {
     val finalReport = createFinalReport(reports);
     val content = toPrettyJson(finalReport);
     writeStringToFile(content, outputReportFile);
@@ -116,12 +119,14 @@ public class ProcessService implements Runnable {
   @SneakyThrows
   private static List<Report> extractReportData(Stream<GenomicEntity> failedGenomicEntityStream) {
     return failedGenomicEntityStream
-        .map(x -> IdDNEErrorReport.builder()
-            .errorType("id.does.not.exist")
-            .entityType(x.getGenomicType().name())
-            .studyId(x.getStudyId())
-            .submitterId(x.getSubmitterId())
-            .build())
+        .map(
+            x ->
+                IdDNEErrorReport.builder()
+                    .errorType("id.does.not.exist")
+                    .entityType(x.getGenomicType().name())
+                    .studyId(x.getStudyId())
+                    .submitterId(x.getSubmitterId())
+                    .build())
         .collect(toUnmodifiableList());
   }
 

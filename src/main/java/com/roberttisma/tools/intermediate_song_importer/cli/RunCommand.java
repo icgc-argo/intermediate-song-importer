@@ -7,8 +7,6 @@ import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.check
 import static com.roberttisma.tools.intermediate_song_importer.util.ProfileManager.findProfile;
 import static java.lang.String.format;
 
-import com.roberttisma.tools.intermediate_song_importer.Factory;
-import com.roberttisma.tools.intermediate_song_importer.model.IdConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.ProfileConfig;
 import com.roberttisma.tools.intermediate_song_importer.service.IdValidationService;
 import com.roberttisma.tools.intermediate_song_importer.service.ProcessService;
@@ -59,7 +57,8 @@ public class RunCommand implements Callable<Integer> {
     val result = findProfile(profileName);
     if (result.isPresent()) {
       val profileConfig = result.get();
-      val analysisTypeValidationService = createAnalysisTypeValidationService(profileConfig.getTargetSong());
+      val analysisTypeValidationService =
+          createAnalysisTypeValidationService(profileConfig.getTargetSong());
       ProcessService.builder()
           .profileConfig(profileConfig)
           .inputDir(inputDir)
@@ -78,7 +77,7 @@ public class RunCommand implements Callable<Integer> {
     return 0;
   }
 
-  private static IdValidationService buildIdValidationService(ProfileConfig p){
+  private static IdValidationService buildIdValidationService(ProfileConfig p) {
     val idConfig = p.getTargetSong().getId();
     checkIdConfig(idConfig);
     return createIdValidationService(idConfig);

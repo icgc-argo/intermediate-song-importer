@@ -1,12 +1,11 @@
 package com.roberttisma.tools.intermediate_song_importer.model.report;
 
+import java.nio.file.Path;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.nio.file.Path;
-import java.util.List;
 
 @Data
 @Builder
@@ -20,7 +19,8 @@ public class AnalysisTypeValidationErrorReport implements Report {
   private int currentVersion;
   private List<Path> payloadFilenames;
 
-  @Override public boolean hasErrors() {
+  @Override
+  public boolean hasErrors() {
     return true;
   }
 }

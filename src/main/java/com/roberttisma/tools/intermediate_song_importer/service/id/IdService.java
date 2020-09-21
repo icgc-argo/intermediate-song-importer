@@ -30,5 +30,4 @@ public interface IdService {
   Optional<String> getSpecimenId(String studyId, String submitterSpecimenId);
 
   Optional<String> getSampleId(String studyId, String submitterSampleId);
-
 }

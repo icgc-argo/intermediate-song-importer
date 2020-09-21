@@ -19,7 +19,6 @@ import com.roberttisma.tools.intermediate_song_importer.service.SourceSongServic
 import com.roberttisma.tools.intermediate_song_importer.service.TargetSongService;
 import com.roberttisma.tools.intermediate_song_importer.service.id.FederatedIdService;
 import com.roberttisma.tools.intermediate_song_importer.service.id.IdService;
-import com.roberttisma.tools.intermediate_song_importer.service.id.UriResolver;
 import com.roberttisma.tools.intermediate_song_importer.util.RestClient;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -29,17 +28,17 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.jodah.failsafe.RetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 
 @Slf4j
 public class Factory {
 
-  public static AnalysisTypeValidationService createAnalysisTypeValidationService(@NonNull TargetSongConfig targetSongConfig){
+  public static AnalysisTypeValidationService createAnalysisTypeValidationService(
+      @NonNull TargetSongConfig targetSongConfig) {
     val song = createTargetSongService(targetSongConfig);
     return new AnalysisTypeValidationService(song);
   }
 
-  public static IdValidationService createIdValidationService(@NonNull IdConfig idConfig){
+  public static IdValidationService createIdValidationService(@NonNull IdConfig idConfig) {
     val idService = createIdService(idConfig);
     return new IdValidationService(idService);
   }
@@ -77,13 +76,13 @@ public class Factory {
     return new Repository(new HikariDataSource(c));
   }
 
-  private static IdService createIdService(@NonNull IdConfig idConfig){
+  private static IdService createIdService(@NonNull IdConfig idConfig) {
     val restClient = createRestClient();
     val uriResolver = createUriResolver(idConfig);
-    return new FederatedIdService(restClient, uriResolver );
+    return new FederatedIdService(restClient, uriResolver);
   }
 
-  private static RestClient createRestClient(){
+  private static RestClient createRestClient() {
     val retry = createRetry(HttpResponse.class);
     return new RestClient(retry);
   }
@@ -109,6 +108,7 @@ public class Factory {
     return TargetSongService.builder()
         .restClient(createRestClient())
         .api(createSongApi(c))
-        .config(c).build();
+        .config(c)
+        .build();
   }
 }
