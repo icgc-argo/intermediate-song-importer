@@ -5,7 +5,10 @@ import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.re
 
 import java.nio.file.Path;
 
+import bio.overture.song.core.model.AnalysisType;
+import bio.overture.song.core.model.AnalysisTypeId;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.NonNull;
 import lombok.val;
 
 public class Payloads {
@@ -17,6 +20,7 @@ public class Payloads {
   private static final String SPECIMEN = "specimen";
   private static final String SUBMITTER_SAMPLE_ID = "submitterSampleId";
   private static final String SAMPLES = "samples";
+  private static final String ANALYSIS_TYPE = "analysisType";
 
   public static String parseStudyId(Path jsonPath) {
     val root = readTree(jsonPath);
@@ -50,6 +54,17 @@ public class Payloads {
   public static JsonNode parseSamples(JsonNode root) {
     checkRequiredField(root, SAMPLES);
     return root.path(SAMPLES);
+  }
+
+  public static AnalysisTypeId parseAnalysisTypeId(JsonNode root) {
+    checkRequiredField(root, ANALYSIS_TYPE);
+    val at = root.path(ANALYSIS_TYPE);
+    return JsonUtils.mapper().convertValue(at, AnalysisTypeId.class);
+  }
+
+  public static AnalysisTypeId parseAnalysisTypeId(@NonNull Path jsonPath) {
+    val root = readTree(jsonPath);
+    return parseAnalysisTypeId(root);
   }
 
 

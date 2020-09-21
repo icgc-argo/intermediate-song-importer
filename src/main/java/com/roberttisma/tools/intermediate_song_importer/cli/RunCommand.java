@@ -1,5 +1,6 @@
 package com.roberttisma.tools.intermediate_song_importer.cli;
 
+import static com.roberttisma.tools.intermediate_song_importer.Factory.createAnalysisTypeValidationService;
 import static com.roberttisma.tools.intermediate_song_importer.Factory.createIdValidationService;
 import static com.roberttisma.tools.intermediate_song_importer.model.IdConfig.checkIdConfig;
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.checkDirectoryExists;
@@ -58,10 +59,12 @@ public class RunCommand implements Callable<Integer> {
     val result = findProfile(profileName);
     if (result.isPresent()) {
       val profileConfig = result.get();
+      val analysisTypeValidationService = createAnalysisTypeValidationService(profileConfig.getTargetSong());
       ProcessService.builder()
           .profileConfig(profileConfig)
           .inputDir(inputDir)
           .idValidationService(buildIdValidationService(profileConfig))
+          .analysisTypeValidationService(analysisTypeValidationService)
           .outputReportFile(outputReportFile)
           .numThreads(numThreads)
           .build()

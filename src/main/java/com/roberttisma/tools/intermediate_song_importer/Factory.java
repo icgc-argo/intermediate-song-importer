@@ -12,6 +12,7 @@ import com.roberttisma.tools.intermediate_song_importer.model.IdConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.SourceSongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.TargetSongConfig;
+import com.roberttisma.tools.intermediate_song_importer.service.AnalysisTypeValidationService;
 import com.roberttisma.tools.intermediate_song_importer.service.IdValidationService;
 import com.roberttisma.tools.intermediate_song_importer.service.MigrationService;
 import com.roberttisma.tools.intermediate_song_importer.service.SourceSongService;
@@ -32,6 +33,11 @@ import org.springframework.retry.support.RetryTemplate;
 
 @Slf4j
 public class Factory {
+
+  public static AnalysisTypeValidationService createAnalysisTypeValidationService(@NonNull TargetSongConfig targetSongConfig){
+    val song = createTargetSongService(targetSongConfig);
+    return new AnalysisTypeValidationService(song);
+  }
 
   public static IdValidationService createIdValidationService(@NonNull IdConfig idConfig){
     val idService = createIdService(idConfig);

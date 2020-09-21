@@ -59,7 +59,7 @@ public class MigrationService {
       return buildSuccessReport(jsonFile, sourceAnalysisFiles, targetAnalysis);
     } catch (Throwable t) {
       log.error(
-          "[PROCESSING_ERROR] filename='{}' errorType='{}':  '{}",
+          "[MIGRATION_ERROR] filename='{}' errorType='{}':  '{}",
           jsonFile.toString(),
           t.getClass().getSimpleName(),
           t.getMessage());
@@ -97,7 +97,7 @@ public class MigrationService {
             .isAllObjectIdsMigrated(allObjectsMigrated)
             .objectIdsMigrated(targetObjectIds)
             .build();
-    log.info("[PROCESSING_SUCCESS]  {}", reportData);
+    log.info("[MIGRATION_SUCCESS]  {}", reportData);
     return reportData;
   }
 

@@ -1,8 +1,15 @@
 package com.roberttisma.tools.intermediate_song_importer.service;
 
 import bio.overture.song.core.model.Analysis;
+import bio.overture.song.core.model.AnalysisType;
+import bio.overture.song.core.model.AnalysisTypeId;
 import bio.overture.song.core.model.FileDTO;
+import bio.overture.song.core.model.PageDTO;
 import bio.overture.song.sdk.SongApi;
+import bio.overture.song.sdk.model.ListAnalysisTypesRequest;
+import bio.overture.song.sdk.model.SortDirection;
+import bio.overture.song.sdk.model.SortOrder;
+import com.google.common.collect.Sets;
 import com.roberttisma.tools.intermediate_song_importer.model.SongConfig;
 import com.roberttisma.tools.intermediate_song_importer.model.Study;
 import com.roberttisma.tools.intermediate_song_importer.util.RestClient;
@@ -16,8 +23,11 @@ import lombok.val;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.roberttisma.tools.intermediate_song_importer.Factory.createRetry;
 import static com.roberttisma.tools.intermediate_song_importer.exceptions.ImporterException.buildImporterException;
@@ -25,6 +35,8 @@ import static com.roberttisma.tools.intermediate_song_importer.exceptions.Import
 import static com.roberttisma.tools.intermediate_song_importer.util.FileIO.readFileContent;
 import static com.roberttisma.tools.intermediate_song_importer.util.JsonUtils.mapper;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static net.jodah.failsafe.Failsafe.with;
 
 @Slf4j
@@ -54,6 +66,20 @@ public class TargetSongService {
         with(createRetry(String.class))
             .get(() -> api.submit(targetStudyId, targetPayload).getAnalysisId());
     return api.getAnalysis(targetStudyId, targetAnalysisId);
+  }
+
+  public Set<AnalysisTypeId> getLatestAnalysisTypeIds(@NonNull Set<String> analysisTypeNames){
+    return analysisTypeNames.stream()
+        .map(x -> api.getAnalysisType(x,null, true))
+        .map(this::convertAnalysisType)
+        .collect(toUnmodifiableSet());
+  }
+
+  private AnalysisTypeId convertAnalysisType(AnalysisType analysisType){
+    return AnalysisTypeId.builder()
+        .name(analysisType.getName())
+        .version(analysisType.getVersion())
+        .build();
   }
 
   // Create the study if it does not exist

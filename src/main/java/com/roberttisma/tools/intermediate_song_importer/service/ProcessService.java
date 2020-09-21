@@ -35,10 +35,12 @@ import lombok.val;
 @RequiredArgsConstructor
 public class ProcessService implements Runnable {
 
+  @NonNull private final AnalysisTypeValidationService analysisTypeValidationService;
   @NonNull private final IdValidationService idValidationService;
   @NonNull private final ProfileConfig profileConfig;
   @NonNull private final Path inputDir;
   @NonNull private final Path outputReportFile;
+
   private final int numThreads;
 
   @Override
@@ -51,25 +53,39 @@ public class ProcessService implements Runnable {
               profileConfig.getSourceSong(), profileConfig.getTargetSong(), dbUpdater);
 
       // Initialize all the studyIds on the target song
+      log.info("Initializing target studyIds");
       service.initTargetStudyIds(files);
 
 	  // Check if all the submitterIds from the batch exist on the external id service that targetSong communicates with
+      log.info("Validating that ALL submitterIds exist on external id service before beginning the migration");
       val idFailedReports = extractReportData(idValidationService.validate(files));
       if (!idFailedReports.isEmpty()){
         log.error("[ID_VALIDATION_ERROR]: Several ids do not exist on the external id service");
         writeFinalReport(idFailedReports);
-      } else {
-        // Concurrently run migrations
-        log.info("[ID_VALIDATION_SUCCESS]: All the submitterIds from '{}' exist on the external id service connected to targetSong", inputDir.toString());
-        val executorService = newFixedThreadPool(numThreads);
-        val futures =
-            partition(files, numThreads).stream()
-                .map(p -> executorService.submit(createMigrationJob(service, p)))
-                .collect(toUnmodifiableList());
-        executorService.shutdown();
-        executorService.awaitTermination(1L, TimeUnit.DAYS);
-        finalizeMigrationReport(futures);
+        return;
       }
+      log.info("[ID_VALIDATION_SUCCESS]: All the submitterIds from '{}' exist on the external id service connected to targetSong", inputDir.toString());
+
+
+      // Check if all analysisTypes already exist and are the latest
+      log.info("Validating that all analysisTypes in all payloads are the latest");
+      val analysisTypeErrorReports = analysisTypeValidationService.validateLatestAnalysisType(files);
+      if (!analysisTypeErrorReports.isEmpty()){
+        writeFinalReport(analysisTypeErrorReports);
+        return ;
+      }
+
+      // Concurrently run migrations
+      log.info("Starting migrations");
+      val executorService = newFixedThreadPool(numThreads);
+      val futures =
+          partition(files, numThreads).stream()
+              .map(p -> executorService.submit(createMigrationJob(service, p)))
+              .collect(toUnmodifiableList());
+      executorService.shutdown();
+      executorService.awaitTermination(1L, TimeUnit.DAYS);
+      log.info("Finished migrations");
+      finalizeMigrationReport(futures);
     }
   }
 
